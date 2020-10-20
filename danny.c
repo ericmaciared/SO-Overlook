@@ -18,7 +18,7 @@
 
 
 //GLOBAL
-Data data;
+int finish = 0;
 
 
 //FUNCTIONS
@@ -27,9 +27,6 @@ void ksighandler(int signum){
     {
     case SIGINT:
         print(DISCONNECTING);
-        //Free memory from data structures
-        freeConfig(&data);
-        exit(0);
         break;
 
     default:
@@ -40,6 +37,7 @@ void ksighandler(int signum){
 
 
 int main(int argc, char const *argv[]){
+    Data data;
     char buffer[64];
     //int sockfd = -1;
 
@@ -51,11 +49,7 @@ int main(int argc, char const *argv[]){
     //Process configuration file
     processConfig(&data, argv[argc -1]);
 
-    //Connect to server
-    //startConnection(&data);
-
-    while (1)
-    {
+    while (!finish){
         //check for new files
         sprintf(buffer, "/$%s:\n", data.station);
         print(buffer);
@@ -64,6 +58,9 @@ int main(int argc, char const *argv[]){
         sleep(data.time);
         
     }
+    
+    
+
     
 
     return 0;
