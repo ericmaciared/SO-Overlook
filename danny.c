@@ -27,7 +27,8 @@ void ksighandler(int signum){
     {
     case SIGINT:
         print(DISCONNECTING);
-        break;
+        exit(-1);
+	break;
 
     default:
         break;
