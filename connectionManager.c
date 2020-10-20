@@ -6,6 +6,7 @@
 
 //INCLUDES
 #include "connectionManager.h"
+#include "functions.h"
 
 //FUNCTIONS
 void fill(char** target, int fd, char delimiter){
@@ -16,11 +17,13 @@ void fill(char** target, int fd, char delimiter){
     count++;
     read(fd, &ptr, 1);
     while(ptr != delimiter){
-        printf("%c = %c\n", *target[count-1], ptr);
         *target[count-1] = ptr;
+        printf("%c = %c\n", *target[count-1], ptr);
+        print("1\n");
         *target = realloc(*target, (++count)*sizeof(char));
-        printf("-%c-\n", ptr);
+        printf("%s\n", *target);
         read(fd, &ptr, 1);
+        printf("%d, %d\n", ptr, delimiter);
     }
     *target[count - 2] = '\0';
     printf("-%s-\n", *target);
@@ -39,7 +42,7 @@ void processConfig(Data* data, const char* file){
       raise(SIGINT);
     }
     else{       
-       //Memory for name
+        //Memory for name
         //fill(&data->station, fd, '\n');
 
         count = 0;
@@ -52,6 +55,7 @@ void processConfig(Data* data, const char* file){
             read(fd, &ptr, 1);
         }
         data->station[count - 2] = '\0';
+
 
         //Memory for path
         count = 0;
@@ -128,7 +132,7 @@ void processConfig(Data* data, const char* file){
         close(fd);
 
         
-        sprintf(buffer, "Station name is -%s-\n", data->station);
+        /*sprintf(buffer, "Station name is -%s-\n", data->station);
         write(1, buffer, strlen(buffer));
         sprintf(buffer, "Path name is -%s-\n", data->path);
         write(1, buffer, strlen(buffer));
@@ -141,9 +145,23 @@ void processConfig(Data* data, const char* file){
         sprintf(buffer, "WendyIP is -%s-\n", data->wendyIP);
         write(1, buffer, strlen(buffer));
         sprintf(buffer, "WendyPort is -%s-\n", data->wendyPort);
-        write(1, buffer, strlen(buffer));
+        write(1, buffer, strlen(buffer));*/
         
     }
 }
 
+void freeConfig(Data* data){
+    free(data->station);
+    free(data->path);
+    free(data->jackIP);
+    free(data->jackPort);
+    free(data->wendyIP);
+    free(data->wendyPort);
 
+    data->station = NULL;
+    data->path = NULL;
+    data->jackIP = NULL;
+    data->jackPort = NULL;
+    data->wendyIP = NULL;
+    data->wendyPort = NULL;
+}

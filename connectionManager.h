@@ -38,5 +38,7 @@ void processConfig(Data* data, const char* file);
 
 void fill(char** target, int fd, char delimiter);
 
+void freeConfig(Data* data);
+
 
 #endif

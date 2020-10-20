@@ -1,18 +1,21 @@
 /**
- * Authors: Eric Macià Redono (eric.macia)
+ * Authors: Eric Macià Redondo (eric.macia)
  *          Guillermo Sabaté Castells (guillermo.sabate)
  **/
+
 
 //MODULES
 #include "libraries.h"
 #include "functions.h"
 #include "connectionManager.h"
 
-//DEFINES
 
+//DEFINES
 #define EOL "\n"
 #define STARTING "\nStarting Danny...\n\n"
 #define DISCONNECTING "\nDisconnecting Danny...\n\n"
+#define TESTING "Testing...\n"
+
 
 //GLOBAL
 Data data;
@@ -25,7 +28,7 @@ void ksighandler(int signum){
     case SIGINT:
         print(DISCONNECTING);
         //Free memory from data structures
-        
+        freeConfig(&data);
         exit(0);
         break;
 
@@ -35,16 +38,33 @@ void ksighandler(int signum){
     signal(signum, ksighandler);
 }
 
+
 int main(int argc, char const *argv[]){
+    char buffer[64];
+    //int sockfd = -1;
+
     print(STARTING);
 
     //Reprogram signals
-    for (int i = 0; i < 64; i++) signal(i, ksighandler);
+    signal(SIGINT, ksighandler);
 
     //Process configuration file
     processConfig(&data, argv[argc -1]);
 
+    //Connect to server
+    //startConnection(&data);
 
+    while (1)
+    {
+        //check for new files
+        sprintf(buffer, "/$%s:\n", data.station);
+        print(buffer);
+        print(TESTING);
+        //sleep data time
+        sleep(data.time);
+        
+    }
+    
 
     return 0;
 }
