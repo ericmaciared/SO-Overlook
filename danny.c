@@ -27,7 +27,7 @@ void ksighandler(int signum){
     {
     case SIGINT:
         print(DISCONNECTING);
-        exit(-1);
+        finish=1;
 	break;
 
     default:
@@ -60,9 +60,8 @@ int main(int argc, char const *argv[]){
         
     }
     
-    
+    freeConfig(&data);
 
-    
 
     return 0;
 }

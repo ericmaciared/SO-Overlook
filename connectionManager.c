@@ -19,15 +19,10 @@ char* fill(int fd, char delimiter){
     read(fd, &ptr, 1);
     while(ptr != delimiter){
         target[count-1] = ptr;
-        //printf("%c = %c\n", target[count-1], ptr);
-        //print("1\n");
         target = realloc(target, (++count)*sizeof(char));
-        //printf("%s\n", target);
         read(fd, &ptr, 1);
-        //printf("%d, %d\n", ptr, delimiter);
     }
     target[count - 2] = '\0';
-    //printf("-%s-\n", target);
     return target;
 }
 
@@ -46,33 +41,9 @@ void processConfig(Data* data, const char* file){
     else{
         //Memory for name
         data->station = fill(fd, '\n');
-        //strcat(data->station, fill(data->station, fd, '\n'));
-
-        /*count = 0;
-        data->station = (char*) malloc(sizeof(char));
-        count++;
-        read(fd, &ptr, 1);
-        while(ptr != '\n'){
-            data->station[count-1] = ptr;
-            data->station = realloc(data->station, (++count)*sizeof(char));
-            read(fd, &ptr, 1);
-        }
-        data->station[count - 2] = '\0';*/
-
 
         //Memory for path
         data->path = fill(fd, '\n');
-        //strcat(data->path, fill(data->path, fd, '\n'));
-        /*count = 0;
-        data->path = (char*) malloc(sizeof(char));
-        count++;
-        read(fd, &ptr, 1);
-        while(ptr != '\n'){
-            data->path[count-1] = ptr;
-            data->path = realloc(data->path, (++count)*sizeof(char));
-            read(fd, &ptr, 1);
-        }
-        data->path[count - 2] = '\0';*/
 
         //Getting time
         count = 0;
@@ -86,60 +57,15 @@ void processConfig(Data* data, const char* file){
 
         //Memory for Jack server IP
         data->jackIP = fill(fd, '\n');
-        //strcat(data->jackIP,fill(data->jackIP, fd, '\n'));
-        /*count = 0;
-        data->jackIP = (char*) malloc(sizeof(char));
-        count++;
-        read(fd, &ptr, 1);
-        while(ptr != '\n'){
-            data->jackIP[count-1] = ptr;
-            data->jackIP = realloc(data->jackIP, (++count)*sizeof(char));
-            read(fd, &ptr, 1);
-        }
-        data->jackIP[count - 2] = '\0';*/
 
         //Memory for Jack port
         data->jackPort = fill(fd, '\n');
-        //strcat(data->jackPort,fill(data->jackPort, fd, '\n'));
-        /*count = 0;
-        data->jackPort = (char*) malloc(sizeof(char));
-        count++;
-        read(fd, &ptr, 1);
-        while(ptr != '\n'){
-            data->jackPort[count-1] = ptr;
-            data->jackPort = realloc(data->jackPort, (++count)*sizeof(char));
-            read(fd, &ptr, 1);
-        }
-        data->jackPort[count - 2] = '\0';*/
 
         //Memory for Wendy server IP
         data->wendyIP = fill(fd, '\n');
-        //strcat(data->wendyIP,fill(data->wendyIP, fd, '\n'));
-        /*count = 0;
-        data->wendyIP = (char*) malloc(sizeof(char));
-        count++;
-        read(fd, &ptr, 1);
-        while(ptr != '\n'){
-            data->wendyIP[count-1] = ptr;
-            data->wendyIP = realloc(data->wendyIP, (++count)*sizeof(char));
-            read(fd, &ptr, 1);
-        }
-        data->wendyIP[count - 2] = '\0';*/
 
         //Memory for Wendy port
         data->wendyPort = fill(fd, '\n');
-        //strcat(data->wendyPort,fill(data->wendyPort, fd, '\n'));
-        /*count = 0;
-        data->wendyPort = (char*) malloc(sizeof(char));
-        count++;
-        read(fd, &ptr, 1);
-        while(ptr != '\n'){
-            data->wendyPort[count-1] = ptr;
-            data->wendyPort = realloc(data->wendyPort, (++count)*sizeof(char));
-            read(fd, &ptr, 1);
-        }
-        data->wendyPort[count - 2] = '\0';*/
-
 
         //Close file
         close(fd);
