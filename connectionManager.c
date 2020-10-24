@@ -70,7 +70,7 @@ void processConfig(Data* data, const char* file){
         //Close file
         close(fd);
 
-        sprintf(buffer, "Station name is -%s-\n", data->station);
+        /*sprintf(buffer, "Station name is -%s-\n", data->station);
         write(1, buffer, strlen(buffer));
         sprintf(buffer, "Path name is -%s-\n", data->path);
         write(1, buffer, strlen(buffer));
@@ -83,7 +83,7 @@ void processConfig(Data* data, const char* file){
         sprintf(buffer, "WendyIP is -%s-\n", data->wendyIP);
         write(1, buffer, strlen(buffer));
         sprintf(buffer, "WendyPort is -%s-\n", data->wendyPort);
-        write(1, buffer, strlen(buffer));
+        write(1, buffer, strlen(buffer));*/
 
     }
 }
@@ -102,4 +102,25 @@ void freeConfig(Data* data){
     data->jackPort = NULL;
     data->wendyIP = NULL;
     data->wendyPort = NULL;
+}
+
+void scanDirectory(Data* data){
+    DIR* d;
+    char buffer[32];
+    struct dirent* dir;
+
+    sprintf(buffer, ".%s", data->path);
+    print(buffer);
+    print(EOL);
+    d = opendir(buffer);
+     if (d)
+    {
+        while ((dir = readdir(d)) != NULL)
+        {
+            print(dir->d_name);
+            print(EOL);
+        }
+        closedir(d);
+    }
+
 }

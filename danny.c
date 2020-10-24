@@ -50,18 +50,19 @@ int main(int argc, char const *argv[]){
     //Process configuration file
     processConfig(&data, argv[argc -1]);
 
-    while (!finish){
+    do
+    {
         //check for new files
         sprintf(buffer, "/$%s:\n", data.station);
         print(buffer);
         print(TESTING);
+        scanDirectory(&data);
         //sleep data time
         sleep(data.time);
-        
-    }
-    
-    freeConfig(&data);
+    } while (!finish);
 
+    //Free remaining dynamic memory
+    freeConfig(&data);
 
     return 0;
 }

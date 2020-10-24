@@ -16,7 +16,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
-
+#include <dirent.h>
 
 //DEFINES
 #define EOL "\n"
@@ -43,6 +43,9 @@ char* fill(int fd, char delimiter);
 
 //OBJECTIVE: free all the stored config data 
 void freeConfig(Data* data);
+
+//OBJECTIVE: scan local data directory for new files 
+void scanDirectory(Data* data);
 
 
 #endif
