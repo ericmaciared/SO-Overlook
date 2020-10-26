@@ -14,7 +14,6 @@
 #define EOL "\n"
 #define STARTING "\nStarting Danny...\n\n"
 #define DISCONNECTING "\nDisconnecting Danny...\n\n"
-#define TESTING "Testing...\n"
 
 
 //GLOBAL
@@ -39,8 +38,6 @@ void ksighandler(int signum){
 
 int main(int argc, char const *argv[]){
     Data data;
-    char buffer[64];
-    //int sockfd = -1;
 
     print(STARTING);
 
@@ -52,10 +49,6 @@ int main(int argc, char const *argv[]){
 
     do
     {
-        //check for new files
-        sprintf(buffer, "/$%s:\n", data.station);
-        print(buffer);
-        print(TESTING);
         scanDirectory(&data);
         //sleep data time
         sleep(data.time);

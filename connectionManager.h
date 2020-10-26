@@ -20,6 +20,12 @@
 
 //DEFINES
 #define EOL "\n"
+#define TESTING "Testing...\n"
+#define FILES_FOUND "%d files found\n"
+#define NO_FILES "No files available\n"
+#define NOFILE 0
+#define TXT 1
+#define JPG 2
 
 
 //STRUCTS

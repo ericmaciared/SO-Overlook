@@ -104,23 +104,108 @@ void freeConfig(Data* data){
     data->wendyPort = NULL;
 }
 
+int checkExtension(char* filename){
+    int code = NOFILE;
+    char end[4];
+
+    if (strlen(filename) < 3) return code;
+
+    end[0] = filename[strlen(filename) - 3];
+    end[1] = filename[strlen(filename) - 2];
+    end[2] = filename[strlen(filename) - 1];
+    end[3] = '\0';
+
+    if (!strcmp(end, "txt")) code = TXT;
+    if (!strcmp(end, "jpg")) code = JPG;
+    
+    return code;
+}
+
+void showFile(char* filename){
+    char buffer[128];
+    int fd = -1;
+    char ptr;
+
+    fd = open(filename, O_RDONLY);
+    if (fd < 0) {
+      sprintf(buffer, "Error opening %s", filename);
+      perror(buffer);
+      return;
+    }
+    else{
+        while(!read(fd, &ptr, 1)){
+            print(&ptr);
+        }
+    }
+}
+
 void scanDirectory(Data* data){
     DIR* d;
     char buffer[32];
     struct dirent* dir;
+    char** files;
+    int num_files = 0;
+
+    files = (char**) malloc(sizeof(char*)); 
+
+    //check for new files
+    sprintf(buffer, "/$%s:\n", data->station);
+    print(buffer);
+    print(TESTING);
 
     sprintf(buffer, ".%s", data->path);
-    print(buffer);
-    print(EOL);
     d = opendir(buffer);
-     if (d)
-    {
-        while ((dir = readdir(d)) != NULL)
-        {
-            print(dir->d_name);
-            print(EOL);
+     if (d){
+        while ((dir = readdir(d)) != NULL){
+            files[num_files++] = (char*) malloc(strlen(dir->d_name) * sizeof(char));
+            files[num_files - 1] = dir->d_name;
+            files = realloc(files, (num_files + 1) * sizeof(char*));
         }
         closedir(d);
+
+        //Show directory scan file results
+        if (num_files <= 2) print(NO_FILES);
+        else {
+            //We ignore the . and .. file accesses
+            sprintf(buffer, FILES_FOUND, num_files - 2);
+            print(buffer);
+            for (int i = 2; i < num_files; i++){
+                print(files[i]);
+                print(EOL);
+            }
+
+            //Process files
+            for (int i = 2; i < num_files; i++)
+            {
+                switch (checkExtension(files[i]))
+                {
+                case TXT:
+                    showFile(files[i]);
+                    break;
+
+                case JPG:
+                    //send file to server
+
+                    break;
+                
+                default:
+                    break;
+                }
+            }
+            
+        }
+        
+        
+        //Free remaining dynamic memory
+        for (int i = 0; i < num_files -1; i++)
+        {
+            //free(files[i]);
+        }
+        free(files);
+        print("Files free\n");
+        
+        
     }
 
+    print(EOL);
 }
