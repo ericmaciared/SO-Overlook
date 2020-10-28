@@ -117,14 +117,15 @@ int checkExtension(char* filename){
 
     if (!strcmp(end, "txt")) code = TXT;
     if (!strcmp(end, "jpg")) code = JPG;
-    
+
     return code;
 }
 
 void showFile(char* filename){
+    StationData data;
     char buffer[128];
     int fd = -1;
-    char ptr;
+    //char ptr;
 
     fd = open(filename, O_RDONLY);
     if (fd < 0) {
@@ -133,10 +134,40 @@ void showFile(char* filename){
       return;
     }
     else{
-        while(!read(fd, &ptr, 1)){
-            print(&ptr);
-        }
+      data.dateString = fill(fd,'\n');
+      print(data.dateString);
+      print(EOL);
+      data.hourString = fill(fd,'\n');
+      print(data.hourString);
+      print(EOL);
+      data.temperatureString = fill(fd,'\n');
+      print(data.temperatureString);
+      print(EOL);
+      data.humidityString = fill(fd,'\n');
+      print(data.humidityString);
+      print(EOL);
+      data.pressureString = fill(fd,'\n');
+      print(data.pressureString);
+      print(EOL);
+      data.precipitationString = fill(fd,'\n');
+      print(data.precipitationString);
+      print(EOL);
+      data.temperature = atof(data.temperatureString);
+      data.humidity = atoi(data.humidityString);
+      data.pressure = atof(data.pressureString);
+      data.precipitation = atof(data.precipitationString);
+
+      // Check atoi and atofs, although not optimized
+      //printf("Temperature: %f\nHumidity: %d%%\nPressure: %f\nPrecipitation: %f\n", data.temperature, data.humidity, data.pressure, data.precipitation);
+
+      /*
+      while(read(fd, &ptr, 1) > 0){
+        print(&ptr);
+      }
+      */
+
     }
+    close(fd);
 }
 
 void scanDirectory(Data* data){
@@ -144,9 +175,10 @@ void scanDirectory(Data* data){
     char buffer[32];
     struct dirent* dir;
     char** files;
+    char* path;
     int num_files = 0;
 
-    files = (char**) malloc(sizeof(char*)); 
+    files = (char**) malloc(sizeof(char*));
 
     //check for new files
     sprintf(buffer, "/$%s:\n", data->station);
@@ -180,22 +212,35 @@ void scanDirectory(Data* data){
                 switch (checkExtension(files[i]))
                 {
                 case TXT:
-                    showFile(files[i]);
+                    print(EOL);
+                    print(files[i]);
+                    print(EOL);
+                    // Copyting the Directory
+                    path = (char*) malloc((strlen(data->path)+1) * sizeof(char));
+                    strcpy(path, data->path);
+                    //Removint the first '/'
+                    memmove(path, path+1, strlen(path));
+                    //Adding '/'
+                    path[strlen(data->path)-1] = '/';
+                    path[strlen(data->path)] = '\0';
+                    //Concatenate filename
+                    char* fullpath = strcat(path, files[i]);
+                    showFile(fullpath);
                     break;
 
                 case JPG:
                     //send file to server
 
                     break;
-                
+
                 default:
                     break;
                 }
             }
-            
+
         }
-        
-        
+
+
         //Free remaining dynamic memory
         for (int i = 0; i < num_files -1; i++)
         {
@@ -203,8 +248,8 @@ void scanDirectory(Data* data){
         }
         free(files);
         print("Files free\n");
-        
-        
+
+
     }
 
     print(EOL);

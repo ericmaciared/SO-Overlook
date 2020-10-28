@@ -39,6 +39,22 @@ typedef struct Data{
   char* wendyPort;
 }Data;
 
+typedef struct StationData{
+  char* dateString;
+  char* hourString;
+  char* temperatureString;
+  char* humidityString;
+  char* pressureString;
+  char* precipitationString;
+
+  int date[8];
+  int hour[6];
+  float temperature;
+  int humidity;
+  float pressure;
+  float precipitation;
+}StationData;
+
 //FUNCTIONS
 
 //OBJECTIVE: process the data from a config.txt file and store it
@@ -47,10 +63,10 @@ void processConfig(Data* data, const char* file);
 //OBJECTIVE: read a string of characters and return the allocated pointer
 char* fill(int fd, char delimiter);
 
-//OBJECTIVE: free all the stored config data 
+//OBJECTIVE: free all the stored config data
 void freeConfig(Data* data);
 
-//OBJECTIVE: scan local data directory for new files 
+//OBJECTIVE: scan local data directory for new files
 void scanDirectory(Data* data);
 
 
