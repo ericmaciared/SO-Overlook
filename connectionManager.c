@@ -187,7 +187,7 @@ void scanDirectory(Data* data){
                         sprintf(buffer, ".%s/%s", data->path, files[i]);             
                         showFile(buffer);
 
-                        //remove(buffer);
+                        remove(buffer);
                         
                         break;
 
