@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS= -g -lm -Wall -Wextra
+CFLAGS= -g -lm -Wall -Wextra -fno-stack-protector
 DEPS = connectionManager.h functions.h libraries.h 
 OBJ = danny.o connectionManager.o functions.o
 

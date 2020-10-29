@@ -35,7 +35,6 @@ void ksighandler(int signum){
     signal(signum, ksighandler);
 }
 
-
 int main(int argc, char const *argv[]){
     Data data;
 
@@ -44,17 +43,16 @@ int main(int argc, char const *argv[]){
     //Reprogram signals
     signal(SIGINT, ksighandler);
 
-    //Process configuration file
+    //Fill danny config file
     processConfig(&data, argv[argc -1]);
 
-    do
-    {
+    do{
+        //scan directory and sleep 
         scanDirectory(&data);
-        //sleep data time
         sleep(data.time);
     } while (!finish);
 
-    //Free remaining dynamic memory
+    //Free remaining dynamic memory from danny config
     freeConfig(&data);
 
     return 0;

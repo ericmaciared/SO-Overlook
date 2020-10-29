@@ -6,7 +6,6 @@
 
 //INCLUDES
 #include "connectionManager.h"
-#include "functions.h"
 
 //FUNCTIONS
 char* fill(int fd, char delimiter){
@@ -39,13 +38,11 @@ void processConfig(Data* data, const char* file){
       raise(SIGINT);
     }
     else{
-        //Memory for name
+        //Fill memory for each section of config file
         data->station = fill(fd, '\n');
-
-        //Memory for path
         data->path = fill(fd, '\n');
 
-        //Getting time
+        //Fill memory for time
         count = 0;
         read(fd, &ptr, 1);
         while(ptr != '\n'){
@@ -55,36 +52,13 @@ void processConfig(Data* data, const char* file){
         buffer[count] = '\0';
         data->time = atoi(buffer);
 
-        //Memory for Jack server IP
         data->jackIP = fill(fd, '\n');
-
-        //Memory for Jack port
         data->jackPort = fill(fd, '\n');
-
-        //Memory for Wendy server IP
         data->wendyIP = fill(fd, '\n');
-
-        //Memory for Wendy port
         data->wendyPort = fill(fd, '\n');
 
         //Close file
         close(fd);
-
-        /*sprintf(buffer, "Station name is -%s-\n", data->station);
-        write(1, buffer, strlen(buffer));
-        sprintf(buffer, "Path name is -%s-\n", data->path);
-        write(1, buffer, strlen(buffer));
-        sprintf(buffer, "Time is -%d-\n", data->time);
-        write(1, buffer, strlen(buffer));
-        sprintf(buffer, "JackIP is -%s-\n", data->jackIP);
-        write(1, buffer, strlen(buffer));
-        sprintf(buffer, "JackPort is -%s-\n", data->jackPort);
-        write(1, buffer, strlen(buffer));
-        sprintf(buffer, "WendyIP is -%s-\n", data->wendyIP);
-        write(1, buffer, strlen(buffer));
-        sprintf(buffer, "WendyPort is -%s-\n", data->wendyPort);
-        write(1, buffer, strlen(buffer));*/
-
     }
 }
 
@@ -123,9 +97,8 @@ int checkExtension(char* filename){
 
 void showFile(char* filename){
     StationData data;
-    char buffer[128];
+    char buffer[32];
     int fd = -1;
-    //char ptr;
 
     fd = open(filename, O_RDONLY);
     if (fd < 0) {
@@ -133,39 +106,36 @@ void showFile(char* filename){
       perror(buffer);
       return;
     }
-    else{
-      data.dateString = fill(fd,'\n');
-      print(data.dateString);
-      print(EOL);
-      data.hourString = fill(fd,'\n');
-      print(data.hourString);
-      print(EOL);
-      data.temperatureString = fill(fd,'\n');
-      print(data.temperatureString);
-      print(EOL);
-      data.humidityString = fill(fd,'\n');
-      print(data.humidityString);
-      print(EOL);
-      data.pressureString = fill(fd,'\n');
-      print(data.pressureString);
-      print(EOL);
-      data.precipitationString = fill(fd,'\n');
-      print(data.precipitationString);
-      print(EOL);
-      data.temperature = atof(data.temperatureString);
-      data.humidity = atoi(data.humidityString);
-      data.pressure = atof(data.pressureString);
-      data.precipitation = atof(data.precipitationString);
+    else {
+        data.dateString = fill(fd,'\n');
+        print(data.dateString);
+        print(EOL);
+        data.hourString = fill(fd,'\n');
+        print(data.hourString);
+        print(EOL);
+        data.temperatureString = fill(fd,'\n');
+        print(data.temperatureString);
+        print(EOL);
+        data.humidityString = fill(fd,'\n');
+        print(data.humidityString);
+        print(EOL);
+        data.pressureString = fill(fd,'\n');
+        print(data.pressureString);
+        print(EOL);
+        data.precipitationString = fill(fd,'\n');
+        print(data.precipitationString);
+        print(EOL);
+        data.temperature = atof(data.temperatureString);
+        data.humidity = atoi(data.humidityString);
+        data.pressure = atof(data.pressureString);
+        data.precipitation = atof(data.precipitationString);
 
-      // Check atoi and atofs, although not optimized
-      //printf("Temperature: %f\nHumidity: %d%%\nPressure: %f\nPrecipitation: %f\n", data.temperature, data.humidity, data.pressure, data.precipitation);
-
-      /*
-      while(read(fd, &ptr, 1) > 0){
-        print(&ptr);
-      }
-      */
-
+        free(data.dateString);
+        free(data.hourString);
+        free(data.temperatureString);
+        free(data.humidityString);
+        free(data.pressureString);
+        free(data.precipitationString);
     }
     close(fd);
 }
@@ -173,27 +143,27 @@ void showFile(char* filename){
 void scanDirectory(Data* data){
     DIR* d;
     char buffer[32];
-    struct dirent* dir;
-    char** files;
-    char* path;
+    struct dirent* dir = NULL;
+    char** files = NULL;
     int num_files = 0;
 
     files = (char**) malloc(sizeof(char*));
 
     //check for new files
-    sprintf(buffer, "/$%s:\n", data->station);
+    sprintf(buffer, "$%s:\n", data->station);
     print(buffer);
     print(TESTING);
 
     sprintf(buffer, ".%s", data->path);
     d = opendir(buffer);
-     if (d){
+    if (d){
         while ((dir = readdir(d)) != NULL){
-            files[num_files++] = (char*) malloc(strlen(dir->d_name) * sizeof(char));
-            files[num_files - 1] = dir->d_name;
+            files[num_files++] = (char*) malloc((strlen(dir->d_name) + 1) * sizeof(char));
+            strcpy(files[num_files - 1], dir->d_name);
             files = realloc(files, (num_files + 1) * sizeof(char*));
-        }
+        } 
         closedir(d);
+        
 
         //Show directory scan file results
         if (num_files <= 2) print(NO_FILES);
@@ -207,49 +177,37 @@ void scanDirectory(Data* data){
             }
 
             //Process files
-            for (int i = 2; i < num_files; i++)
-            {
-                switch (checkExtension(files[i]))
-                {
-                case TXT:
-                    print(EOL);
-                    print(files[i]);
-                    print(EOL);
-                    // Copyting the Directory
-                    path = (char*) malloc((strlen(data->path)+1) * sizeof(char));
-                    strcpy(path, data->path);
-                    //Removint the first '/'
-                    memmove(path, path+1, strlen(path));
-                    //Adding '/'
-                    path[strlen(data->path)-1] = '/';
-                    path[strlen(data->path)] = '\0';
-                    //Concatenate filename
-                    char* fullpath = strcat(path, files[i]);
-                    showFile(fullpath);
-                    break;
+            for (int i = 2; i < num_files; i++){
+                switch (checkExtension(files[i])){
+                    case TXT:
+                        print(EOL);
+                        print(files[i]);
+                        print(EOL);
 
-                case JPG:
-                    //send file to server
+                        sprintf(buffer, ".%s/%s", data->path, files[i]);             
+                        showFile(buffer);
 
-                    break;
+                        //remove(buffer);
+                        
+                        break;
 
-                default:
-                    break;
+                    case JPG:
+                        //send file to server
+
+                        break;
+
+                    default:
+                        break;
                 }
             }
-
         }
-
 
         //Free remaining dynamic memory
-        for (int i = 0; i < num_files -1; i++)
+        for (int i = 0; i < num_files; i++)
         {
-            //free(files[i]);
+            free(files[i]);
         }
         free(files);
-        print("Files free\n");
-
-
     }
 
     print(EOL);
