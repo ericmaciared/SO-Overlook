@@ -7,7 +7,7 @@
 //MODULES
 #include "libraries.h"
 #include "functions.h"
-#include "connectionManager.h"
+#include "dannyManager.h"
 
 
 //DEFINES
@@ -19,40 +19,26 @@
 //GLOBAL
 int finish = 0;
 
-
 //FUNCTIONS
-void ksighandler(int signum){
-    switch (signum)
-    {
-    case SIGINT:
-        print(DISCONNECTING);
-        finish=1;
-	break;
-
-    default:
-        break;
-    }
+void ksighandler(){
+    print(DISCONNECTING);
+    finish=1;
     signal(signum, ksighandler);
 }
 
 int main(int argc, char const *argv[]){
     Data data;
 
-    print(STARTING);
-
-    //Reprogram signals
     signal(SIGINT, ksighandler);
-
-    //Fill danny config file
+        
+    print(STARTING);
     processConfig(&data, argv[argc -1]);
 
     do{
-        //scan directory and sleep 
-        scanDirectory(&data);
+        scanDirectory(&data); 
         sleep(data.time);
     } while (!finish);
 
-    //Free remaining dynamic memory from danny config
     freeConfig(&data);
 
     return 0;

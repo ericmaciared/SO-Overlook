@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS= -g -lm -Wall -Wextra -fno-stack-protector
-DEPS = connectionManager.h functions.h libraries.h 
-OBJ = danny.o connectionManager.o functions.o
+DEPS = dannyManager.h functions.h libraries.h 
+OBJ = danny.o dannyManager.o functions.o
 
 %.o: %.c $(DEPS)
 	@echo "Compiling project"
@@ -16,4 +16,4 @@ danny: $(OBJ)
 
 clean:
 	@echo "Cleaning up"
-	rm -f *.o
+	rm *.o
