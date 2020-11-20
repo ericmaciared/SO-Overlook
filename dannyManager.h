@@ -17,7 +17,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <dirent.h>
-#include <conio.h>
+//#include <conio.h>
 
 
 //MODULES

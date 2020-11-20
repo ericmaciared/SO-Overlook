@@ -8,7 +8,7 @@
 #include "dannyManager.h"
 
 //FUNCTIONS
-char* fill(int fd, char delimiter){
+/*char* fill(int fd, char delimiter){
     char ptr;
     char* target = NULL;
     int count = 0;
@@ -23,7 +23,7 @@ char* fill(int fd, char delimiter){
     }
     target[count - 2] = '\0';
     return target;
-}
+}*/
 
 void processConfig(Data* data, const char* file){
     char buffer[128];
@@ -39,8 +39,8 @@ void processConfig(Data* data, const char* file){
     }
     else{
         //Fill memory for each section of config file
-        data->station = fill(fd, '\n');
-        data->path = fill(fd, '\n');
+        data->station = readUntil(fd, '\n');
+        data->path = readUntil(fd, '\n');
 
         //Fill memory for time
         count = 0;
@@ -52,10 +52,10 @@ void processConfig(Data* data, const char* file){
         buffer[count] = '\0';
         data->time = atoi(buffer);
 
-        data->jackIP = fill(fd, '\n');
-        data->jackPort = fill(fd, '\n');
-        data->wendyIP = fill(fd, '\n');
-        data->wendyPort = fill(fd, '\n');
+        data->jackIP = readUntil(fd, '\n');
+        data->jackPort = readUntil(fd, '\n');
+        data->wendyIP = readUntil(fd, '\n');
+        data->wendyPort = readUntil(fd, '\n');
 
         //Close file
         close(fd);
@@ -107,22 +107,22 @@ void showFile(char* filename){
       return;
     }
     else {
-        data.dateString = fill(fd,'\n');
+        data.dateString = readUntil(fd,'\n');
         print(data.dateString);
         print(EOL);
-        data.hourString = fill(fd,'\n');
+        data.hourString = readUntil(fd,'\n');
         print(data.hourString);
         print(EOL);
-        data.temperatureString = fill(fd,'\n');
+        data.temperatureString = readUntil(fd,'\n');
         print(data.temperatureString);
         print(EOL);
-        data.humidityString = fill(fd,'\n');
+        data.humidityString = readUntil(fd,'\n');
         print(data.humidityString);
         print(EOL);
-        data.pressureString = fill(fd,'\n');
+        data.pressureString = readUntil(fd,'\n');
         print(data.pressureString);
         print(EOL);
-        data.precipitationString = fill(fd,'\n');
+        data.precipitationString = readUntil(fd,'\n');
         print(data.precipitationString);
         print(EOL);
         data.temperature = atof(data.temperatureString);
@@ -164,6 +164,7 @@ void scanDirectory(Data* data){
         } 
         closedir(d);
         
+        print("Here!\n");
 
         //Show directory scan file results
         if (num_files <= 2) print(NO_FILES);
@@ -187,7 +188,7 @@ void scanDirectory(Data* data){
                         sprintf(buffer, ".%s/%s", data->path, files[i]);             
                         showFile(buffer);
 
-                        remove(buffer);
+                        //remove(buffer);
                         
                         break;
 

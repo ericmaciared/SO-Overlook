@@ -23,7 +23,7 @@ int finish = 0;
 void ksighandler(){
     print(DISCONNECTING);
     finish=1;
-    signal(signum, ksighandler);
+    signal(SIGINT, ksighandler);
 }
 
 int main(int argc, char const *argv[]){
