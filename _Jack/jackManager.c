@@ -15,7 +15,7 @@ int processConfig(Config* config, const char* file){
     fd = open(file, O_RDONLY);
 
     if (fd <= 0) {
-        perror(ERROR_FILE);
+        perror(ERROR_CONFIG);
         return 0;
     }
     else {
@@ -26,5 +26,35 @@ int processConfig(Config* config, const char* file){
     return 1;
 }
 
+int initServer(Config* config){
+    
+    int sockfd;
+    struct sockaddr_in s_addr;
+    
+    //Create and check socket
+    sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sockfd < 0){
+        print(ERROR_SOCKET);
+        return -1;
+    }
+
+    //Bind and check socket
+    memset(&s_addr, 0, sizeof(s_addr));
+    s_addr.sin_family = AF_INET;
+    s_addr.sin_port = htons(atoi(config->ip));
+    s_addr.sin_addr.s_addr = INADDR_ANY;
+
+    if (bind(sockfd, (void *) &s_addr, sizeof(s_addr)) < 0){
+        print(ERROR_BIND);
+        return -1;
+    }
+    
+
+    
+
+
+    
+    return sockfd;
+}
 
 

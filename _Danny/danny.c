@@ -22,15 +22,19 @@ void ksighandler(){
 
 int main(int argc, char const *argv[]){
     Data data;
-
-    signal(SIGINT, ksighandler);
         
     print(STARTING);
+
+    //Activate signal interruption
+    signal(SIGINT, ksighandler);
+
+    //Check correct arguments
     if (argc <= 1 || argc > 2){
         print(ERROR_ARGS);
         exit(EXIT_FAILURE);
     }
     
+    //Process configuration file
     if(!processConfig(&data, argv[argc -1])){
         exit(EXIT_FAILURE);
     }
@@ -38,6 +42,7 @@ int main(int argc, char const *argv[]){
     //Connect to Jack
     
 
+    //Scan directory and sleep
     do{
         scanDirectory(&data); 
         sleep(data.time);

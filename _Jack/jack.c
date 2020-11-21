@@ -20,19 +20,27 @@ void ksighandler(){
 
 int main(int argc, char const *argv[]){
     Config config;
+    int sockfd;
 
     print(STARTING);
 
     //Reprogram signals
     signal(SIGINT, ksighandler);
     
-    //Fill config file
-    if(!processConfig(&config, argv[argc -1])){
+    //Check correct arguments
+    if (argc <= 1 || argc > 2){
+        print(ERROR_ARGS);
         exit(EXIT_FAILURE);
     }
-    print(config.ip);
-    print(EOL);
-    printf("-%d-\n", config.port);
+    
+    //Fill config file
+    if(!processConfig(&config, argv[argc -1])) exit(EXIT_FAILURE);
+
+    //Create socket
+    sockfd = initServer(&config);
+    
+    if (sockfd < 0) exit(EXIT_FAILURE);
+    
 
 
 

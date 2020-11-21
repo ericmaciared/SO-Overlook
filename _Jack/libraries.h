@@ -6,16 +6,23 @@
 #ifndef _LIBRARIES_H_
 #define _LIBRARIES_H_
 
-#include <arpa/inet.h> 
-#include <fcntl.h> 
-#include <math.h>
-#include <signal.h>
-#include <stdio.h>
+#define _GNU_SOURCE
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <pthread.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h> 
-#include <sys/stat.h>
-#include <time.h>
+#include <stdarg.h>
 #include <unistd.h>
+#include <string.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <time.h>
+#include <math.h>
 
 #endif
