@@ -43,6 +43,15 @@ typedef struct{
     int port;
 }Config;
 
+typedef struct StationData{
+  char* dateString;
+  char* hourString;
+  char* temperatureString;
+  char* humidityString;
+  char* pressureString;
+  char* precipitationString;
+}StationData;
+
 
 //FUNCTIONS
 /*
@@ -65,7 +74,7 @@ int initServer(Config* config);
 
 int acceptConnection(int sockfdServer);
 
-
+void readFromClient(int sockfd, StationData* station);
 
 
 #endif

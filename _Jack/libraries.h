@@ -17,6 +17,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
