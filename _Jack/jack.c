@@ -16,11 +16,15 @@ int finish = 0;
 void ksighandler(){
     //Disconnect connections
     finish = 1;
+
+    //temporal solution
+    exit(EXIT_FAILURE);
 }
 
 int main(int argc, char const *argv[]){
     Config config;
     int sockfd;
+    int sockfdClient;
 
     print(STARTING);
 
@@ -41,7 +45,8 @@ int main(int argc, char const *argv[]){
     
     if (sockfd < 0) exit(EXIT_FAILURE);
     
-
+    sockfdClient = acceptConnection(sockfd);
+    if (sockfdClient < 0) exit(EXIT_FAILURE);
 
 
     //Free remaining dynamic memory

@@ -7,52 +7,7 @@
 //INCLUDES
 #include "dannyManager.h"
 
-int processConfig(Data* data, const char* file){
-    char* aux;
-    int fd = -1;
-
-    fd = open(file, O_RDONLY);
-    if (fd < 0) {
-        print(ERROR_CONFIG);
-        return 0;
-    }
-    else{
-        //Fill structure
-        data->station = readUntil(fd, '\n');
-
-        data->path = readUntil(fd, '\n');
-
-        aux = readUntil(fd, '\n');
-        data->time = atoi(aux);
-
-        data->jack.ip = readUntil(fd, '\n');
-
-        aux = readUntil(fd, '\n');
-        data->jack.port = atoi(aux);
-
-        data->wendy.ip = readUntil(fd, '\n');
-
-        aux = readUntil(fd, '\n');
-        data->wendy.port = atoi(aux);
-
-        close(fd);
-    }
-    return 1;
-}
-
-
-void freeConfig(Data* data){
-    free(data->station);
-    free(data->path);
-    free(data->jack.ip);
-    free(data->wendy.ip);
-
-    data->station = NULL;
-    data->path = NULL;
-    data->jack.ip = NULL;
-    data->wendy.ip = NULL;
-}
-
+//PRIVATE FUNCTIONS
 
 int checkExtension(char* filename){
     int code = NOFILE;
@@ -70,7 +25,6 @@ int checkExtension(char* filename){
 
     return code;
 }
-
 
 void showFile(char* filename){
     StationData data;
@@ -115,6 +69,78 @@ void showFile(char* filename){
         free(data.precipitationString);
     }
     close(fd);
+}
+
+//PUBLIC FUNCTIONS
+int processConfig(Data* data, const char* file){
+    char* aux;
+    int fd = -1;
+
+    fd = open(file, O_RDONLY);
+    if (fd < 0) {
+        print(ERROR_CONFIG);
+        return 0;
+    }
+    else{
+        //Fill structure
+        data->station = readUntil(fd, '\n');
+
+        data->path = readUntil(fd, '\n');
+
+        aux = readUntil(fd, '\n');
+        data->time = atoi(aux);
+
+        data->jack.ip = readUntil(fd, '\n');
+
+        aux = readUntil(fd, '\n');
+        data->jack.port = atoi(aux);
+
+        data->wendy.ip = readUntil(fd, '\n');
+
+        aux = readUntil(fd, '\n');
+        data->wendy.port = atoi(aux);
+
+        close(fd);
+    }
+    return 1;
+}
+
+void freeConfig(Data* data){
+    free(data->station);
+    free(data->path);
+    free(data->jack.ip);
+    free(data->wendy.ip);
+
+    data->station = NULL;
+    data->path = NULL;
+    data->jack.ip = NULL;
+    data->wendy.ip = NULL;
+}
+
+int connectToJack(Data* data){
+    int sockfd = -1;
+
+    sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sockfd < 0){
+        print(ERROR_SOCKET);
+        return -1;
+    }
+
+    struct sockaddr_in s_addr;
+    memset(&s_addr, 0, sizeof(s_addr));
+    s_addr.sin_family = AF_INET;
+    s_addr.sin_port = htons(data->jack.port);
+    if (inet_aton(data->jack.ip, &s_addr.sin_addr) == 0){
+        print(ERROR_IP);
+        return -1;
+    }
+
+    if (connect(sockfd, (void *) &s_addr, sizeof(s_addr)) < 0){
+        print(ERROR_CONNECT);
+        return -1;
+    }
+    
+    return sockfd;
 }
 
 void scanDirectory(Data* data){

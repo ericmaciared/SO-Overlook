@@ -17,11 +17,15 @@ int finish = 0;
 
 //FUNCTIONS
 void ksighandler(){
-    finish=1;
+    finish = 1;
+
+    //temporal
+    exit(EXIT_FAILURE);
 }
 
 int main(int argc, char const *argv[]){
     Data data;
+    int sockfd = -1;
         
     print(STARTING);
 
@@ -40,7 +44,10 @@ int main(int argc, char const *argv[]){
     }
 
     //Connect to Jack
-    
+    sockfd = connectToJack(&data);
+    if(sockfd < 0){
+        exit(EXIT_FAILURE);
+    }
 
     //Scan directory and sleep
     do{

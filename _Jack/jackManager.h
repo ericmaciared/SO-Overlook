@@ -30,9 +30,11 @@
 #define ERROR_ARGS "Error processing arguments.\n\n"
 #define ERROR_SOCKET "Error processing socket\n\n"
 #define ERROR_BIND "Error binding socket\n\n"
+#define ERROR_ACCEPT "Error accepting new connection\n\n"
 
 #define STARTING "\nStarting Jack...\n\n"
 #define DISCONNECTING "\nDisconnecting Jack...\n\n"
+#define CONNECTION_WAITING "Waiting for connection...\n"
 
 
 //STRUCTS
@@ -59,6 +61,11 @@ int processConfig(Config* config, const char* file);
 * @return: fd of the new connection socket
 */
 int initServer(Config* config);
+
+
+int acceptConnection(int sockfdServer);
+
+
 
 
 #endif

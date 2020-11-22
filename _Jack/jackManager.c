@@ -41,20 +41,38 @@ int initServer(Config* config){
     //Bind and check socket
     memset(&s_addr, 0, sizeof(s_addr));
     s_addr.sin_family = AF_INET;
-    s_addr.sin_port = htons(atoi(config->ip));
+    s_addr.sin_port = htons(config->port);
     s_addr.sin_addr.s_addr = INADDR_ANY;
 
     if (bind(sockfd, (void *) &s_addr, sizeof(s_addr)) < 0){
         print(ERROR_BIND);
         return -1;
     }
-    
 
-    
-
-
+    //Listen
+    listen(sockfd, 16);
     
     return sockfd;
 }
+
+int acceptConnection(int sockfdServer){
+    struct sockaddr_in s_addr;
+    socklen_t len = sizeof(s_addr);
+
+    //Waits for connection from client
+
+    print(CONNECTION_WAITING);
+    int sockfdClient = accept(sockfdServer, (void *) &s_addr, &len);
+    if (sockfdClient < 0){
+        print(ERROR_ACCEPT);
+        return -1;
+    }
+
+    printf("New connection from  %s:%hu\n", inet_ntoa(s_addr.sin_addr),
+        ntohs(s_addr.sin_port));
+
+    return sockfdClient;
+}
+
 
 

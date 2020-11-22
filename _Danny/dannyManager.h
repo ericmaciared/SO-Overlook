@@ -30,6 +30,9 @@
 #define NO_FILES "No files available\n"
 #define ERROR_CONFIG "Error opening configuration file.\n\n"
 #define ERROR_ARGS "Error processing arguments.\n\n"
+#define ERROR_SOCKET "Error processing socket\n\n"
+#define ERROR_IP "Error processing invalid IP\n\n"
+#define ERROR_CONNECT "Error connecting to server\n\n"
 
 #define STARTING "\nStarting Danny...\n\n"
 #define CONNECT_JACK "\nConnecting Jack...\n"
@@ -86,6 +89,14 @@ int processConfig(Data* data, const char* file);
 * @param: data pointer to structure
 */
 void freeConfig(Data* data);
+
+/*
+* Creates and binds socket for server communication with
+* a Jack process.
+* @param data pointer to configuration info structure
+* @return sockfd if successful, -1 if error
+*/
+int connectToJack(Data* data);
 
 /*
 * Scans for new files in stored data directory and handles
