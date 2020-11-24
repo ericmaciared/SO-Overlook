@@ -26,7 +26,7 @@ void ksighandler(){
 int main(int argc, char const *argv[]){
     Data data;
     int sockfd = -1;
-        
+
     print(STARTING);
 
     //Activate signal interruption
@@ -37,7 +37,7 @@ int main(int argc, char const *argv[]){
         print(ERROR_ARGS);
         exit(EXIT_FAILURE);
     }
-    
+
     //Process configuration file
     if(!processConfig(&data, argv[argc -1])){
         exit(EXIT_FAILURE);
@@ -49,11 +49,8 @@ int main(int argc, char const *argv[]){
         exit(EXIT_FAILURE);
     }
 
-    //Scan directory and sleep
-    do{
-        scanDirectory(&data); 
-        sleep(data.time);
-    } while (!finish);
+    //Scan directory
+    scanDirectory(&data, sockfd);
 
     print(DISCONNECT_DANNY);
     freeConfig(&data);

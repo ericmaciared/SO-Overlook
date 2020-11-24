@@ -26,8 +26,7 @@ int checkExtension(char* filename){
     return code;
 }
 
-void showFile(char* filename){
-    StationData data;
+void showFile(char* filename, StationData* data){
     char buffer[32];
     int fd = -1;
 
@@ -35,38 +34,27 @@ void showFile(char* filename){
     if (fd < 0) {
       sprintf(buffer, "Error opening %s", filename);
       perror(buffer);
-      return;
+      exit(EXIT_FAILURE);
     }
     else {
-        data.dateString = readUntil(fd,'\n');
-        print(data.dateString);
+        data->dateString = readUntil(fd,'\n');
+        print(data->dateString);
         print(EOL);
-        data.hourString = readUntil(fd,'\n');
-        print(data.hourString);
+        data->hourString = readUntil(fd,'\n');
+        print(data->hourString);
         print(EOL);
-        data.temperatureString = readUntil(fd,'\n');
-        print(data.temperatureString);
+        data->temperatureString = readUntil(fd,'\n');
+        print(data->temperatureString);
         print(EOL);
-        data.humidityString = readUntil(fd,'\n');
-        print(data.humidityString);
+        data->humidityString = readUntil(fd,'\n');
+        print(data->humidityString);
         print(EOL);
-        data.pressureString = readUntil(fd,'\n');
-        print(data.pressureString);
+        data->pressureString = readUntil(fd,'\n');
+        print(data->pressureString);
         print(EOL);
-        data.precipitationString = readUntil(fd,'\n');
-        print(data.precipitationString);
+        data->precipitationString = readUntil(fd,'\n');
+        print(data->precipitationString);
         print(EOL);
-        data.temperature = atof(data.temperatureString);
-        data.humidity = atoi(data.humidityString);
-        data.pressure = atof(data.pressureString);
-        data.precipitation = atof(data.precipitationString);
-
-        free(data.dateString);
-        free(data.hourString);
-        free(data.temperatureString);
-        free(data.humidityString);
-        free(data.pressureString);
-        free(data.precipitationString);
     }
     close(fd);
 }
@@ -84,7 +72,6 @@ int processConfig(Data* data, const char* file){
     else{
         //Fill structure
         data->station = readUntil(fd, '\n');
-
         data->path = readUntil(fd, '\n');
 
         aux = readUntil(fd, '\n');
@@ -127,28 +114,52 @@ int connectToJack(Data* data){
     }
 
     struct sockaddr_in s_addr;
+
     memset(&s_addr, 0, sizeof(s_addr));
     s_addr.sin_family = AF_INET;
     s_addr.sin_port = htons(data->jack.port);
-    if (inet_aton(data->jack.ip, &s_addr.sin_addr) == 0){
+    s_addr.sin_addr.s_addr = inet_addr(data->jack.ip);
+    /*
+    if (inet_pton(AF_INET,data->jack.ip, &s_addr.sin_addr) == 0){
         print(ERROR_IP);
         return -1;
     }
-
+    */
     if (connect(sockfd, (void *) &s_addr, sizeof(s_addr)) < 0){
         print(ERROR_CONNECT);
         return -1;
     }
-    
+
     return sockfd;
 }
 
-void scanDirectory(Data* data){
+void sendToJack(StationData data, int fdSocket, char* station){
+    write(fdSocket, station, strlen(station)+1);
+    write(fdSocket, data.dateString, strlen(data.dateString)+1);
+    write(fdSocket, data.hourString, strlen(data.hourString)+1);
+    write(fdSocket, data.temperatureString, strlen(data.temperatureString)+1);
+    write(fdSocket, data.humidityString, strlen(data.humidityString)+1);
+    write(fdSocket, data.pressureString, strlen(data.pressureString)+1);
+    write(fdSocket, data.precipitationString, strlen(data.precipitationString)+1);
+    print("SENT\n");
+}
+
+void freeDataStation(StationData* data){
+    free(data->dateString);
+    free(data->hourString);
+    free(data->temperatureString);
+    free(data->humidityString);
+    free(data->pressureString);
+    free(data->precipitationString);
+}
+
+void scanDirectory(Data* data, int fdSocket){
     DIR* d;
     char buffer[32];
     struct dirent* dir = NULL;
     char** files = NULL;
     int num_files = 0;
+    StationData station;
 
     files = (char**) malloc(sizeof(char*));
 
@@ -164,9 +175,9 @@ void scanDirectory(Data* data){
             files[num_files++] = (char*) malloc((strlen(dir->d_name) + 1) * sizeof(char));
             strcpy(files[num_files - 1], dir->d_name);
             files = realloc(files, (num_files + 1) * sizeof(char*));
-        } 
+        }
         closedir(d);
-        
+
         //Show directory scan file results
         if (num_files <= 2) print(NO_FILES);
         else {
@@ -186,11 +197,13 @@ void scanDirectory(Data* data){
                         print(files[i]);
                         print(EOL);
 
-                        sprintf(buffer, ".%s/%s", data->path, files[i]);             
-                        showFile(buffer);
-
+                        sprintf(buffer, ".%s/%s", data->path, files[i]);
+                        showFile(buffer, &station);
                         //remove(buffer);
-                        
+
+                        //Send Data to server
+                        sendToJack(station, fdSocket, data->station);
+                        freeDataStation(&station);
                         break;
 
                     case JPG:

@@ -65,13 +65,6 @@ typedef struct StationData{
   char* humidityString;
   char* pressureString;
   char* precipitationString;
-
-  int date[8];
-  int hour[6];
-  float temperature;
-  int humidity;
-  float pressure;
-  float precipitation;
 }StationData;
 
 //FUNCTIONS
@@ -103,7 +96,7 @@ int connectToJack(Data* data);
 * sending and processing of information
 * @param: data pointer to structure with config information
 */
-void scanDirectory(Data* data);
+void scanDirectory(Data* data, int fdSocket);
 
 
 #endif
