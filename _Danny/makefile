@@ -1,7 +1,7 @@
 CC=gcc
-CFLAGS= -g -lm -Wall -Wextra -fno-stack-protector
-DEPS = dannyManager.h functions.h libraries.h 
-OBJ = danny.o dannyManager.o functions.o
+CFLAGS= -g -lm -Wall -Wextra
+DEPS = dannyManager.h protocolManager.h functions.h libraries.h 
+OBJ = danny.o dannyManager.o protocolManager.o functions.o
 
 %.o: %.c $(DEPS)
 	@echo "Compiling project"

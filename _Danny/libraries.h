@@ -7,7 +7,6 @@
 #define _LIBRARIES_H_
 
 #define _GNU_SOURCE
-
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -18,6 +17,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -25,4 +25,6 @@
 #include <fcntl.h>
 #include <time.h>
 #include <math.h>
+#include <dirent.h> 
+
 #endif

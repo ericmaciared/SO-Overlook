@@ -7,21 +7,11 @@
 #define _JACKMANAGER_H_
 
 //LIBRARIES
-#include <fcntl.h>
-#include <math.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <unistd.h>
-#include <dirent.h>
-//#include <conio.h>
-
 
 //MODULES
+#include "libraries.h"
 #include "functions.h"
+#include "protocolManager.h"
 
 
 //DEFINES
@@ -31,6 +21,7 @@
 #define ERROR_SOCKET "Error processing socket\n\n"
 #define ERROR_BIND "Error binding socket\n\n"
 #define ERROR_ACCEPT "Error accepting new connection\n\n"
+#define ERROR_THREAD "Error creating new thread\n\n"
 
 #define STARTING "\nStarting Jack...\n\n"
 #define DISCONNECTING "\nDisconnecting Jack...\n\n"
@@ -43,6 +34,11 @@ typedef struct{
     int port;
 }Config;
 
+typedef struct{
+  char* name;
+  int sockfd;
+} Station;
+
 typedef struct StationData{
   char* dateString;
   char* hourString;
@@ -50,31 +46,33 @@ typedef struct StationData{
   char* humidityString;
   char* pressureString;
   char* precipitationString;
-}StationData;
+} StationData;
 
 
 //FUNCTIONS
-/*
-* This function will process the configuration file
-* @param: config as a pointer to the config struct to fill
-*         file as an address to a file to read from
-* @return: 1 if successful 0 if failure
-*/
+/**
+ * This function will process the configuration file
+ * @param: config as a pointer to the config struct to fill
+ *         file as an address to a file to read from
+ * @return: 1 if successful 0 if failure
+ */
 int processConfig(Config* config, const char* file);
 
-
-/*
-* This will create the socket and configure it to take
-* new connections
-* @param: config pointer to configuration info struct
-* @return: fd of the new connection socket
-*/
+/**
+ * This will create the socket and configure it to take
+ * new connections
+ * @param: config pointer to configuration info struct
+ * @return: fd of the new connection socket for server
+ */
 int initServer(Config* config);
 
-
+/**
+ * This function will wait for incomming connections and will
+ * accept them, returning socket connection for client.
+ * @param: int value for the server socket
+ * @return: int value for new client socket
+ *          -1 if unsuccessful connection
+ */
 int acceptConnection(int sockfdServer);
-
-void readFromClient(int sockfd, StationData* station);
-
 
 #endif

@@ -25,6 +25,7 @@ void ksighandler(){
 
 int main(int argc, char const *argv[]){
     Data data;
+    Station station;
     int sockfd = -1;
 
     print(STARTING);
@@ -43,9 +44,11 @@ int main(int argc, char const *argv[]){
         exit(EXIT_FAILURE);
     }
 
+
     //Connect to Jack
-    sockfd = connectToJack(&data);
-    if(sockfd < 0){
+    station.name = data.station;
+    station.sockfd = connectToJack(&data, station);
+    if(station.sockfd < 0){
         exit(EXIT_FAILURE);
     }
 

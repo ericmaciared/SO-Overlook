@@ -10,12 +10,18 @@
 #include "jackManager.h"
 
 //GLOBAL
-int finish = 0;
 
 //FUNCTIONS
+static void* handleDanny(void* args){
+    Station* client = (Station *) args;
+
+    print("Getting data from socket.\n");
+
+    close(client->sockfd);
+    return (void *) client;
+}
+
 void ksighandler(){
-    //Disconnect connections
-    finish = 1;
 
     //temporal solution
     exit(EXIT_FAILURE);
@@ -24,10 +30,10 @@ void ksighandler(){
 int main(int argc, char const *argv[]){
     Config config;
     int sockfd;
-    int sockfdClient;
-    StationData station;
 
-    print(STARTING);
+    Station client;
+    pthread_t tid[32];
+    int i = 0;
 
     //Reprogram signals
     signal(SIGINT, ksighandler);
@@ -40,17 +46,24 @@ int main(int argc, char const *argv[]){
 
     //Fill config file
     if(!processConfig(&config, argv[argc -1])) exit(EXIT_FAILURE);
+    print(STARTING);
 
     //Create socket
     sockfd = initServer(&config);
-
     if (sockfd < 0) exit(EXIT_FAILURE);
 
-    sockfdClient = acceptConnection(sockfd);
-    if (sockfdClient < 0) exit(EXIT_FAILURE);
+    //Accept connections and assign threads indefinitely
+    while (1) {
+        client.sockfd = acceptConnection(sockfd);
+        if (client.sockfd < 0) break;
 
-    readFromClient(sockfdClient, &station);
-    //Free remaining dynamic memory
-
+        if (pthread_create(&tid[i++], NULL, handleDanny, &client) != 0){
+            print(ERROR_THREAD);
+            i--;
+            close(client.sockfd);
+            break;
+        }
+    }
+    
     return 0;
 }

@@ -1,7 +1,7 @@
 CC=gcc
-CFLAGS= -g -lm -Wall -Wextra -fno-stack-protector
-DEPS = jackManager.h functions.h libraries.h 
-OBJ = jack.o jackManager.o functions.o
+CFLAGS= -g -Wall -Wextra -lpthread
+DEPS = jackManager.h protocolManager.h functions.h libraries.h 
+OBJ = jack.o jackManager.o protocolManager.o functions.o
 
 %.o: %.c $(DEPS)
 	@echo "Compiling project"

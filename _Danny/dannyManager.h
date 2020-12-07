@@ -7,20 +7,11 @@
 #define _DANNYMANAGER_H_
 
 //LIBRARIES
-#include <fcntl.h>
-#include <math.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <unistd.h>
-#include <dirent.h>
-
 
 //MODULES
+#include "libraries.h"
 #include "functions.h"
+#include "protocolManager.h"
 
 
 //DEFINES
@@ -58,6 +49,11 @@ typedef struct Data{
   Config wendy;
 }Data;
 
+typedef struct{
+  char* name;
+  int sockfd;
+} Station;
+
 typedef struct StationData{
   char* dateString;
   char* hourString;
@@ -67,35 +63,37 @@ typedef struct StationData{
   char* precipitationString;
 }StationData;
 
-//FUNCTIONS
 
-/*
-* Processes the data from a config.txt file and store it
-* @param: data points to the Data struct to fill
-*         file indicates file address to read from
-* @return: 1 if successful 0 if error
-*/
+//FUNCTIONS
+/**
+ * Processes the data from a config.txt file and store it
+ * @param: data points to the Data struct to fill
+ *         file indicates file address to read from
+ * @return: 1 if successful 0 if error
+ */ 
 int processConfig(Data* data, const char* file);
 
-/*
-* Frees all the stored dynamic config data
-* @param: data pointer to structure
-*/
+/**
+ * Frees all the stored dynamic config data
+ * @param: data pointer to structure
+ */ 
 void freeConfig(Data* data);
 
-/*
-* Creates and binds socket for server communication with
-* a Jack process.
-* @param data pointer to configuration info structure
-* @return sockfd if successful, -1 if error
-*/
-int connectToJack(Data* data);
+/**
+ * Creates and binds socket for server communication with 
+ * a Jack process.
+ * @param data pointer to configuration info structure
+ *        station struct to information on station
+ * @return sockfd if successful, -1 if error
+ */
 
-/*
-* Scans for new files in stored data directory and handles
-* sending and processing of information
-* @param: data pointer to structure with config information
-*/
+int connectToJack(Data* data, Station station);
+
+/**
+ * Scans for new files in stored data directory and handles
+ * sending and processing of information
+ * @param: data pointer to structure with config information
+ */
 void scanDirectory(Data* data, int fdSocket);
 
 

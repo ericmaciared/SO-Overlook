@@ -7,7 +7,36 @@
 //INCLUDES
 #include "jackManager.h"
 
-//FUNCTIONS
+//PRIVATE FUNCTIONS
+void readFromClient(int fd, StationData* data){
+    print("READING\n");
+    char* aux;
+    aux = readUntil(fd, '\0');
+    print("$");
+    print(aux);
+    print(EOL);
+    free(aux);
+    data->dateString = readUntil(fd,'\0');
+    print(data->dateString);
+    print(EOL);
+    data->hourString = readUntil(fd,'\0');
+    print(data->hourString);
+    print(EOL);
+    data->temperatureString = readUntil(fd,'\0');
+    print(data->temperatureString);
+    print(EOL);
+    data->humidityString = readUntil(fd,'\0');
+    print(data->humidityString);
+    print(EOL);
+    data->pressureString = readUntil(fd,'\0');
+    print(data->pressureString);
+    print(EOL);
+    data->precipitationString = readUntil(fd,'\0');
+    print(data->precipitationString);
+    print(EOL);
+}
+
+//PUBLIC FUNCTIONS
 int processConfig(Config* config, const char* file){
     int fd = -1;
     char* buffer;
@@ -49,50 +78,27 @@ int initServer(Config* config){
         return -1;
     }
 
+    //Listen
+    listen(sockfd, 16);
+
     return sockfd;
 }
 
-void readFromClient(int fd, StationData* data){
-    print("READING\n");
-    char* aux;
-    aux = readUntil(fd, '\0');
-    print("$");
-    print(aux);
-    print(EOL);
-    free(aux);
-    data->dateString = readUntil(fd,'\0');
-    print(data->dateString);
-    print(EOL);
-    data->hourString = readUntil(fd,'\0');
-    print(data->hourString);
-    print(EOL);
-    data->temperatureString = readUntil(fd,'\0');
-    print(data->temperatureString);
-    print(EOL);
-    data->humidityString = readUntil(fd,'\0');
-    print(data->humidityString);
-    print(EOL);
-    data->pressureString = readUntil(fd,'\0');
-    print(data->pressureString);
-    print(EOL);
-    data->precipitationString = readUntil(fd,'\0');
-    print(data->precipitationString);
-    print(EOL);
-}
-
-
 int acceptConnection(int sockfdServer){
-
-    //Listen
-    listen(sockfdServer, 16);
-
     struct sockaddr_in s_addr;
     socklen_t len = sizeof(s_addr);
-    //Waits for connection from client
 
     print(CONNECTION_WAITING);
+    
+    //Waits for connection from client
     int sockfdClient = accept(sockfdServer, (void *) &s_addr, &len);
     if (sockfdClient < 0){
+        print(ERROR_ACCEPT);
+        return -1;
+    }
+
+    //Communication protocol established
+    if(protocolConnection(sockfdServer, sockfdClient) < 0){
         print(ERROR_ACCEPT);
         return -1;
     }

@@ -59,6 +59,27 @@ void showFile(char* filename, StationData* data){
     close(fd);
 }
 
+void sendToJack(StationData data, int fdSocket, char* station){
+    write(fdSocket, station, strlen(station)+1);
+    write(fdSocket, data.dateString, strlen(data.dateString)+1);
+    write(fdSocket, data.hourString, strlen(data.hourString)+1);
+    write(fdSocket, data.temperatureString, strlen(data.temperatureString)+1);
+    write(fdSocket, data.humidityString, strlen(data.humidityString)+1);
+    write(fdSocket, data.pressureString, strlen(data.pressureString)+1);
+    write(fdSocket, data.precipitationString, strlen(data.precipitationString)+1);
+    print("SENT\n");
+}
+
+void freeDataStation(StationData* data){
+    free(data->dateString);
+    free(data->hourString);
+    free(data->temperatureString);
+    free(data->humidityString);
+    free(data->pressureString);
+    free(data->precipitationString);
+}
+
+
 //PUBLIC FUNCTIONS
 int processConfig(Data* data, const char* file){
     char* aux;
@@ -104,9 +125,10 @@ void freeConfig(Data* data){
     data->wendy.ip = NULL;
 }
 
-int connectToJack(Data* data){
+int connectToJack(Data* data, Station station){
     int sockfd = -1;
 
+    //Create socket
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd < 0){
         print(ERROR_SOCKET);
@@ -119,38 +141,20 @@ int connectToJack(Data* data){
     s_addr.sin_family = AF_INET;
     s_addr.sin_port = htons(data->jack.port);
     s_addr.sin_addr.s_addr = inet_addr(data->jack.ip);
-    /*
-    if (inet_pton(AF_INET,data->jack.ip, &s_addr.sin_addr) == 0){
-        print(ERROR_IP);
-        return -1;
-    }
-    */
+    
+    //Connect to socket
     if (connect(sockfd, (void *) &s_addr, sizeof(s_addr)) < 0){
         print(ERROR_CONNECT);
         return -1;
     }
 
+    //Communication protocol
+    if (protocolConnection(sockfd, station.name) < 0){
+        print(ERROR_CONNECT);
+        return -1;
+    }
+    
     return sockfd;
-}
-
-void sendToJack(StationData data, int fdSocket, char* station){
-    write(fdSocket, station, strlen(station)+1);
-    write(fdSocket, data.dateString, strlen(data.dateString)+1);
-    write(fdSocket, data.hourString, strlen(data.hourString)+1);
-    write(fdSocket, data.temperatureString, strlen(data.temperatureString)+1);
-    write(fdSocket, data.humidityString, strlen(data.humidityString)+1);
-    write(fdSocket, data.pressureString, strlen(data.pressureString)+1);
-    write(fdSocket, data.precipitationString, strlen(data.precipitationString)+1);
-    print("SENT\n");
-}
-
-void freeDataStation(StationData* data){
-    free(data->dateString);
-    free(data->hourString);
-    free(data->temperatureString);
-    free(data->humidityString);
-    free(data->pressureString);
-    free(data->precipitationString);
 }
 
 void scanDirectory(Data* data, int fdSocket){
@@ -218,8 +222,7 @@ void scanDirectory(Data* data, int fdSocket){
         }
 
         //Free remaining dynamic memory
-        for (int i = 0; i < num_files; i++)
-        {
+        for (int i = 0; i < num_files; i++){
             free(files[i]);
         }
         free(files);
