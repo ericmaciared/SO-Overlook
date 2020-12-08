@@ -18,9 +18,6 @@ int finish = 0;
 //FUNCTIONS
 void ksighandler(){
     finish = 1;
-
-    //temporal
-    exit(EXIT_FAILURE);
 }
 
 int main(int argc, char const *argv[]){
@@ -53,9 +50,13 @@ int main(int argc, char const *argv[]){
     }
 
     //Scan directory
-    scanDirectory(&data, sockfd);
-
+    while (!finish){
+        scanDirectory(&data, sockfd);
+        sleep(data.time);
+    }
+    
     print(DISCONNECT_DANNY);
+
     freeConfig(&data);
 
     return 0;

@@ -42,7 +42,7 @@ typedef struct{
  * 
  * 
  */
-int protocolConnection(int sockfd, int sockfdclient);
+int protocolConnection(int sockfdclient, char* out);
 
 
 #endif

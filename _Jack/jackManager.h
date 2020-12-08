@@ -23,9 +23,12 @@
 #define ERROR_ACCEPT "Error accepting new connection\n\n"
 #define ERROR_THREAD "Error creating new thread\n\n"
 
+#define JACK_PROMPT "$Jack:\n"
 #define STARTING "\nStarting Jack...\n\n"
 #define DISCONNECTING "\nDisconnecting Jack...\n\n"
-#define CONNECTION_WAITING "Waiting for connection...\n"
+#define CONNECTION_WAITING "Waiting...\n"
+#define NEW_CONNECTION "New connection: %s\n\n"
+#define RECEIVING_DATA "Receiving data...\n"
 
 
 //STRUCTS
@@ -73,6 +76,6 @@ int initServer(Config* config);
  * @return: int value for new client socket
  *          -1 if unsuccessful connection
  */
-int acceptConnection(int sockfdServer);
+int acceptConnection(int sockfdServer, Station* client);
 
 #endif

@@ -8,9 +8,10 @@
 #include "protocolManager.h"
 
 //PRIVATE FUNCTIONS
-int checkFrame(char* frame, char type){
+int checkFrame(char* frame, char type, char* out){
     Frame newFrame;
 
+    //Get source
     for (int i = 0; i < 14; i++){
         if (frame[i] == '$'){
             newFrame.source[i] = '\0';
@@ -19,15 +20,23 @@ int checkFrame(char* frame, char type){
         newFrame.source[i] = frame[i];         
     }
 
+    //Get type
     newFrame.type = frame[14];
+
+    //Get data
     for (int i = 15; i < 115; i++){
-        newFrame.data[i] = frame[i];
         if (frame[i] == '$'){
-            newFrame.data[i] = '\0';
+            newFrame.data[i-15] = '\0';
             break;
-        }        
+        } 
+        else{
+            newFrame.data[i-15] = frame[i];  
+        }
+           
     }
-        
+
+    strcpy(out, newFrame.data);
+
     if (strcmp(newFrame.source, DANNY) != 0) return -1;
 
     if (newFrame.type != type) return -1;
@@ -49,14 +58,15 @@ char* frameToString(Frame frame){
 }
 
 //PUBLIC FUNCTIONS
-int protocolConnection(int sockfd, int sockfdclient){
+int protocolConnection(int sockfdclient, char* out){
     //Frame frame;
-    char buffer[115];
+    char buffer[116];
 
     //Connection Request
     read(sockfdclient, buffer, 115);
-    
-    if (checkFrame(buffer, 'C') > 0){
+    buffer[115] = '\0';
+
+    if (checkFrame(buffer, 'C', out) > 0){
         Frame frame;
         char* buff;
 
@@ -67,7 +77,6 @@ int protocolConnection(int sockfd, int sockfdclient){
         buff = frameToString(frame);
         write(sockfdclient, buff, strlen(buff));
         free(buff);
-
         return 0;  
     }
     else{
@@ -84,6 +93,4 @@ int protocolConnection(int sockfd, int sockfdclient){
         free(buff);
         return -1;
     }
-
-    printf("%d\n", sockfd);
 }

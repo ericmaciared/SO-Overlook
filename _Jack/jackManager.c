@@ -84,10 +84,12 @@ int initServer(Config* config){
     return sockfd;
 }
 
-int acceptConnection(int sockfdServer){
+int acceptConnection(int sockfdServer, Station* client){
     struct sockaddr_in s_addr;
     socklen_t len = sizeof(s_addr);
+    char buff[128];
 
+    print(JACK_PROMPT);
     print(CONNECTION_WAITING);
     
     //Waits for connection from client
@@ -98,13 +100,15 @@ int acceptConnection(int sockfdServer){
     }
 
     //Communication protocol established
-    if(protocolConnection(sockfdServer, sockfdClient) < 0){
+    if(protocolConnection(sockfdClient, buff) < 0){
         print(ERROR_ACCEPT);
         return -1;
     }
 
-    printf("New connection from  %s:%hu\n", inet_ntoa(s_addr.sin_addr),
-        ntohs(s_addr.sin_port));
+    client->name = (char*) malloc(strlen(buff) * sizeof(char));
+    strcpy(client->name, buff);
 
-    return sockfdClient;
+    sprintf(buff, NEW_CONNECTION, client->name);
+    print(buff);
+    return 0;
 }
