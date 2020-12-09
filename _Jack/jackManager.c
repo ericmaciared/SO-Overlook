@@ -8,32 +8,28 @@
 #include "jackManager.h"
 
 //PRIVATE FUNCTIONS
-void readFromClient(int fd, StationData* data){
-    print("READING\n");
-    char* aux;
-    aux = readUntil(fd, '\0');
-    print("$");
-    print(aux);
+void showStationData(StationData* station){
+    print(station->dateString);
     print(EOL);
-    free(aux);
-    data->dateString = readUntil(fd,'\0');
-    print(data->dateString);
+    print(station->hourString);
     print(EOL);
-    data->hourString = readUntil(fd,'\0');
-    print(data->hourString);
+    print(station->temperatureString);
     print(EOL);
-    data->temperatureString = readUntil(fd,'\0');
-    print(data->temperatureString);
+    print(station->humidityString);
     print(EOL);
-    data->humidityString = readUntil(fd,'\0');
-    print(data->humidityString);
+    print(station->pressureString);
     print(EOL);
-    data->pressureString = readUntil(fd,'\0');
-    print(data->pressureString);
+    print(station->precipitationString);
     print(EOL);
-    data->precipitationString = readUntil(fd,'\0');
-    print(data->precipitationString);
-    print(EOL);
+}
+
+void freeStationData(StationData* data){
+    free(data->dateString);
+    free(data->hourString);
+    free(data->temperatureString);
+    free(data->humidityString);
+    free(data->pressureString);
+    free(data->precipitationString);
 }
 
 //PUBLIC FUNCTIONS
@@ -56,7 +52,6 @@ int processConfig(Config* config, const char* file){
 }
 
 int initServer(Config* config){
-
     int sockfd;
     struct sockaddr_in s_addr;
 
@@ -93,14 +88,14 @@ int acceptConnection(int sockfdServer, Station* client){
     print(CONNECTION_WAITING);
     
     //Waits for connection from client
-    int sockfdClient = accept(sockfdServer, (void *) &s_addr, &len);
-    if (sockfdClient < 0){
+    client->sockfd = accept(sockfdServer, (void *) &s_addr, &len);
+    if (client->sockfd < 0){
         print(ERROR_ACCEPT);
         return -1;
     }
 
     //Communication protocol established
-    if(protocolConnection(sockfdClient, buff) < 0){
+    if(protocolConnection(client->sockfd, buff) < 0){
         print(ERROR_ACCEPT);
         return -1;
     }
@@ -112,3 +107,27 @@ int acceptConnection(int sockfdServer, Station* client){
     print(buff);
     return 0;
 }
+
+void readFromDanny(Station* client){
+    StationData sd;
+
+    //Read frame
+    switch(protocolRead(client->sockfd, &sd)){
+        case 'D':
+            //Send data Lloyd
+            //Print to screen
+            showStationData(&sd);
+
+            //Frees of dynamic memory
+            freeStationData(&sd);
+            break;
+
+        case 'Q':
+            break;
+
+        default:
+            //Erroneous frame
+            break;
+    }
+}
+

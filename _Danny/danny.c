@@ -23,7 +23,6 @@ void ksighandler(){
 int main(int argc, char const *argv[]){
     Data data;
     Station station;
-    int sockfd = -1;
 
     print(STARTING);
 
@@ -51,7 +50,7 @@ int main(int argc, char const *argv[]){
 
     //Scan directory
     while (!finish){
-        scanDirectory(&data, sockfd);
+        scanDirectory(&data, station.sockfd);
         sleep(data.time);
     }
     

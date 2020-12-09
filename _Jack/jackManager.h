@@ -42,16 +42,6 @@ typedef struct{
   int sockfd;
 } Station;
 
-typedef struct StationData{
-  char* dateString;
-  char* hourString;
-  char* temperatureString;
-  char* humidityString;
-  char* pressureString;
-  char* precipitationString;
-} StationData;
-
-
 //FUNCTIONS
 /**
  * This function will process the configuration file
@@ -77,5 +67,7 @@ int initServer(Config* config);
  *          -1 if unsuccessful connection
  */
 int acceptConnection(int sockfdServer, Station* client);
+
+void readFromDanny(Station* client);
 
 #endif

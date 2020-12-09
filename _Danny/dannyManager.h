@@ -39,7 +39,7 @@
 typedef struct{
     char* ip;
     int port;
-}Config;
+} Config;
 
 typedef struct Data{
   char* station;
@@ -47,21 +47,12 @@ typedef struct Data{
   int time;
   Config jack;
   Config wendy;
-}Data;
+} Data;
 
 typedef struct{
   char* name;
   int sockfd;
 } Station;
-
-typedef struct StationData{
-  char* dateString;
-  char* hourString;
-  char* temperatureString;
-  char* humidityString;
-  char* pressureString;
-  char* precipitationString;
-}StationData;
 
 
 //FUNCTIONS

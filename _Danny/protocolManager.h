@@ -34,6 +34,14 @@ typedef struct{
   char data[100];
 } Frame;
 
+typedef struct StationData{
+  char* dateString;
+  char* hourString;
+  char* temperatureString;
+  char* humidityString;
+  char* pressureString;
+  char* precipitationString;
+}StationData;
 
 //FUNCTIONS
 
@@ -43,5 +51,8 @@ typedef struct{
  */
 int protocolConnection(int sockfd, char* name);
 
+void stationToString(StationData* station, char* out); 
+
+int protocolSend(int sockfd, char* data);
 
 #endif

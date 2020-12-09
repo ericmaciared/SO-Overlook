@@ -17,6 +17,7 @@ char* readUntil(int fd, char delimiter) {
 
     while (1) {
         size = read(fd, &buff, sizeof(char));
+        // "Igualada\r\n"
         if (buff != delimiter && size > 0) {
             string[i] = buff;
             string = (char*)realloc(string, sizeof(char) * (++i + 1));

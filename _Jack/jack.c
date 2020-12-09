@@ -21,9 +21,11 @@ static void* handleDanny(void* args){
         print(JACK_PROMPT);
         print(RECEIVING_DATA);
         readFromDanny(client);
+        sleep(1);
     }
     
-    //closeStation(client);
+    //TODO: closeStation(client); //protocol disconnection
+
     close(client->sockfd);
     return (void *) client;
 }
@@ -75,11 +77,9 @@ int main(int argc, char const *argv[]){
     }
 
     print(DISCONNECTING);
-    //Wait for all threads to join
+    //TODO: Wait for all threads to join
 
-    //Free all dynamic data
-
-
+    //TODO: Free all dynamic data
     
     return 0;
 }

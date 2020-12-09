@@ -8,7 +8,6 @@
 #include "dannyManager.h"
 
 //PRIVATE FUNCTIONS
-
 int checkExtension(char* filename){
     int code = NOFILE;
     char end[4];
@@ -26,7 +25,7 @@ int checkExtension(char* filename){
     return code;
 }
 
-void showFile(char* filename, StationData* data){
+void getStationData(char* filename, StationData* data){
     char buffer[32];
     int fd = -1;
 
@@ -38,36 +37,28 @@ void showFile(char* filename, StationData* data){
     }
     else {
         data->dateString = readUntil(fd,'\n');
-        print(data->dateString);
-        print(EOL);
         data->hourString = readUntil(fd,'\n');
-        print(data->hourString);
-        print(EOL);
         data->temperatureString = readUntil(fd,'\n');
-        print(data->temperatureString);
-        print(EOL);
         data->humidityString = readUntil(fd,'\n');
-        print(data->humidityString);
-        print(EOL);
         data->pressureString = readUntil(fd,'\n');
-        print(data->pressureString);
-        print(EOL);
         data->precipitationString = readUntil(fd,'\n');
-        print(data->precipitationString);
-        print(EOL);
     }
     close(fd);
 }
 
-void sendToJack(StationData data, int fdSocket, char* station){
-    write(fdSocket, station, strlen(station)+1);
-    write(fdSocket, data.dateString, strlen(data.dateString)+1);
-    write(fdSocket, data.hourString, strlen(data.hourString)+1);
-    write(fdSocket, data.temperatureString, strlen(data.temperatureString)+1);
-    write(fdSocket, data.humidityString, strlen(data.humidityString)+1);
-    write(fdSocket, data.pressureString, strlen(data.pressureString)+1);
-    write(fdSocket, data.precipitationString, strlen(data.precipitationString)+1);
-    print("SENT\n");
+void showStationData(StationData* station){
+    print(station->dateString);
+    print(EOL);
+    print(station->hourString);
+    print(EOL);
+    print(station->temperatureString);
+    print(EOL);
+    print(station->humidityString);
+    print(EOL);
+    print(station->pressureString);
+    print(EOL);
+    print(station->precipitationString);
+    print(EOL);
 }
 
 void freeDataStation(StationData* data){
@@ -77,6 +68,22 @@ void freeDataStation(StationData* data){
     free(data->humidityString);
     free(data->pressureString);
     free(data->precipitationString);
+}
+
+void sendJackData(StationData* station, int fdSocket){
+    //Parse station information to string 
+    char buffer[100];
+    buffer[0] = '\0';
+
+    stationToString(station, buffer);
+
+    if(protocolSend(fdSocket, buffer) < 0){
+        print("Error sending data\n");
+    }
+    else{
+        print("Data sent successfully\n");
+    }
+
 }
 
 
@@ -202,16 +209,19 @@ void scanDirectory(Data* data, int fdSocket){
                         print(EOL);
 
                         sprintf(buffer, ".%s/%s", data->path, files[i]);
-                        showFile(buffer, &station);
+                        getStationData(buffer, &station);
+                        showStationData(&station);
+
                         //remove(buffer);
 
-                        //Send Data to server
-                        sendToJack(station, fdSocket, data->station);
+                        //Send to Jack
+                        sendJackData(&station, fdSocket);
+                        
                         freeDataStation(&station);
                         break;
 
                     case JPG:
-                        //send file to server
+                        //Send to Wendy
 
                         break;
 
