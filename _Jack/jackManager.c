@@ -86,7 +86,7 @@ int acceptConnection(int sockfdServer, Station* client){
 
     print(JACK_PROMPT);
     print(CONNECTION_WAITING);
-    
+
     //Waits for connection from client
     client->sockfd = accept(sockfdServer, (void *) &s_addr, &len);
     if (client->sockfd < 0){
@@ -108,11 +108,12 @@ int acceptConnection(int sockfdServer, Station* client){
     return 0;
 }
 
-void readFromDanny(Station* client){
+char readFromDanny(Station* client){
     StationData sd;
+    char type = protocolRead(client->sockfd, &sd);
 
     //Read frame
-    switch(protocolRead(client->sockfd, &sd)){
+    switch(type){
         case 'D':
             //Send data Lloyd
             //Print to screen
@@ -127,7 +128,55 @@ void readFromDanny(Station* client){
 
         default:
             //Erroneous frame
+            return 'K';
             break;
     }
+    return type;
 }
 
+int replyToDanny(Station* client, char type){
+    char buffer[64];
+    switch(type){
+        case 'D':
+            protocolResponse(client->sockfd, 'B', DATAOK);
+            print(DATAOK);
+            print(EOL);
+
+            return 0;
+            break;
+
+        case 'K':
+            protocolResponse(client->sockfd, type, DATAKO);
+            print(DATAKO);
+            print(EOL);
+
+            return 0;
+            break;
+
+        case 'Q':
+            //Disconnect Server
+            sprintf(buffer, BYEDANNY, client->name);
+            print(buffer);
+            close(client->sockfd);
+            free(client->name);
+            free(client);
+
+            return 1;
+            break;
+
+        default:
+            //Erroneous processing
+            //Reply with X (Custom control variable)
+            protocolResponse(client->sockfd, 'X', DATADEAD);
+            print(DATADEAD);
+            print(EOL);
+
+            //Disconnect Server
+            close(client->sockfd);
+            free(client->name);
+            free(client);
+
+            return 1;
+    }
+    return -1;
+}

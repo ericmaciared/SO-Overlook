@@ -46,13 +46,13 @@ typedef struct StationData{
 //FUNCTIONS
 
 /**
- * 
- * 
+ *
+ *
  */
 int protocolConnection(int sockfd, char* name);
 
-void stationToString(StationData* station, char* out); 
+void stationToString(StationData* station, char* out);
 
-int protocolSend(int sockfd, char* data);
+int protocolSend(int sockfd, char type, char* data);
 
 #endif

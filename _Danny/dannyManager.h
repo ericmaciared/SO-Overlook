@@ -61,21 +61,21 @@ typedef struct{
  * @param: data points to the Data struct to fill
  *         file indicates file address to read from
  * @return: 1 if successful 0 if error
- */ 
+ */
 int processConfig(Data* data, const char* file);
 
 /**
  * Frees all the stored dynamic config data
  * @param: data pointer to structure
- */ 
+ */
 void freeConfig(Data* data);
 
 /**
- * Creates and binds socket for server communication with 
+ * Creates and binds socket for server communication with
  * a Jack process.
- * @param data pointer to configuration info structure
+ * @param: data pointer to configuration info structure
  *        station struct to information on station
- * @return sockfd if successful, -1 if error
+ * @return: sockfd if successful, -1 if error
  */
 
 int connectToJack(Data* data, Station station);
@@ -86,6 +86,12 @@ int connectToJack(Data* data, Station station);
  * @param: data pointer to structure with config information
  */
 void scanDirectory(Data* data, int fdSocket);
+
+/**
+ * Sends Jack a Disconnection message and leaves
+ * @param: station struct to information on station
+ */
+void disconnectJack(Station* station);
 
 
 #endif

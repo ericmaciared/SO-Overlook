@@ -26,6 +26,9 @@
 #define JACK "JACK"
 #define ERROR "ERROR"
 #define OK "CONNEXIO OK"
+#define DATAOK "DADES OK"
+#define DATAKO "DADES KO"
+#define DATADEAD "DADES WENT VERY KO"
 
 
 //STRUCTS
@@ -48,14 +51,19 @@ typedef struct StationData{
 //FUNCTIONS
 
 /**
- * 
- * 
+ *
+ *
  */
 int protocolConnection(int sockfdclient, char* out);
 
 /**
- * 
- */ 
+ *
+ */
 char protocolRead(int sockfdclient, StationData* station);
+
+/**
+ *
+ */
+void protocolResponse(int sockfdclient, char responseType, char* response);
 
 #endif

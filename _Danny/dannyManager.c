@@ -71,13 +71,13 @@ void freeDataStation(StationData* data){
 }
 
 void sendJackData(StationData* station, int fdSocket){
-    //Parse station information to string 
+    //Parse station information to string
     char buffer[100];
     buffer[0] = '\0';
 
     stationToString(station, buffer);
 
-    if(protocolSend(fdSocket, buffer) < 0){
+    if(protocolSend(fdSocket, 'D', buffer) < 0){
         print("Error sending data\n");
     }
     else{
@@ -148,7 +148,7 @@ int connectToJack(Data* data, Station station){
     s_addr.sin_family = AF_INET;
     s_addr.sin_port = htons(data->jack.port);
     s_addr.sin_addr.s_addr = inet_addr(data->jack.ip);
-    
+
     //Connect to socket
     if (connect(sockfd, (void *) &s_addr, sizeof(s_addr)) < 0){
         print(ERROR_CONNECT);
@@ -160,7 +160,7 @@ int connectToJack(Data* data, Station station){
         print(ERROR_CONNECT);
         return -1;
     }
-    
+
     return sockfd;
 }
 
@@ -216,7 +216,7 @@ void scanDirectory(Data* data, int fdSocket){
 
                         //Send to Jack
                         sendJackData(&station, fdSocket);
-                        
+
                         freeDataStation(&station);
                         break;
 
@@ -239,4 +239,9 @@ void scanDirectory(Data* data, int fdSocket){
     }
 
     print(EOL);
+}
+
+void disconnectJack(Station* station){
+    protocolSend(station->sockfd, 'Q', station->name);
+    print(DISCONNECT_JACK);
 }

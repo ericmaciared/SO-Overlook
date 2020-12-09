@@ -16,17 +16,16 @@ int terminate = 0;
 //FUNCTIONS
 static void* handleDanny(void* args){
     Station* client = (Station *) args;
-
     while (!terminate){
         print(JACK_PROMPT);
         print(RECEIVING_DATA);
-        readFromDanny(client);
+        terminate = replyToDanny(client, readFromDanny(client));
         sleep(1);
     }
-    
+
     //TODO: closeStation(client); //protocol disconnection
 
-    close(client->sockfd);
+    //close(client->sockfd);
     return (void *) client;
 }
 
@@ -72,7 +71,6 @@ int main(int argc, char const *argv[]){
             close(client.sockfd);
             break;
         }
-
         sleep(5);
     }
 
@@ -80,6 +78,6 @@ int main(int argc, char const *argv[]){
     //TODO: Wait for all threads to join
 
     //TODO: Free all dynamic data
-    
+
     return 0;
 }
