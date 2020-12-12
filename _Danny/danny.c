@@ -40,7 +40,6 @@ int main(int argc, char const *argv[]){
         exit(EXIT_FAILURE);
     }
 
-
     //Connect to Jack
     station.name = data.station;
     station.sockfd = connectToJack(&data, station);
@@ -53,6 +52,7 @@ int main(int argc, char const *argv[]){
         scanDirectory(&data, station.sockfd);
         sleep(data.time);
     }
+
     print(EOL);
     print(DISCONNECT_DANNY);
     disconnectJack(&station);

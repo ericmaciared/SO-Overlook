@@ -26,7 +26,8 @@
 #define ERROR_CONNECT "Error connecting to server\n\n"
 
 #define STARTING "\nStarting Danny...\n\n"
-#define CONNECT_JACK "\nConnecting Jack...\n"
+#define CONNECTING_JACK "Connecting Jack...\n"
+#define CONNECTED_JACK "Connected to Jack.\n"
 #define DISCONNECT_JACK "\nDisconnecting Jack...\n"
 #define DISCONNECT_DANNY "Disconnecting Danny...\n\n"
 

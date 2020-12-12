@@ -135,6 +135,8 @@ void freeConfig(Data* data){
 int connectToJack(Data* data, Station station){
     int sockfd = -1;
 
+    print(CONNECTING_JACK);
+
     //Create socket
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd < 0){
@@ -160,7 +162,8 @@ int connectToJack(Data* data, Station station){
         print(ERROR_CONNECT);
         return -1;
     }
-
+    
+    print(CONNECTED_JACK);
     return sockfd;
 }
 

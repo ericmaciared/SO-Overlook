@@ -8,23 +8,25 @@
 #include "protocolManager.h"
 
 //PRIVATE FUNCTIONS
-char* frameToString(Frame frame){
-    char* final = NULL;
-    final = (char*) malloc(115 * sizeof(char));
+void frameToString(Frame frame, char* final){
+    int flag = 0;
+    int i;
+    bzero(final, 115);
 
-    for (int i = 0; i < 115; i++){
-        final[i] = '\0';
+    for (i = 0; i < 14; i++){
+        if (frame.source[i] == '\0') flag = 1;
+        if (flag) final[i] = '$';
+        else final[i] = frame.source[i];
     }
-
-    strcat(final, frame.source);
-    memset(&final[strlen(final)], '$', 14 - strlen(frame.source));
+    
     final[14] = frame.type;
 
-
-    strcat(final, frame.data);
-    memset(&final[strlen(final)], '$', 100 - strlen(frame.data));
-
-    return final;
+    flag = 0;
+    for (i = 15; i < 115; i++){
+        if (frame.data[i-15] == '\0') flag = 1;
+        if (flag) final[i] = '$';
+        else final[i] = frame.data[i-15];
+    }
 }
 
 Frame makeFrame(char type, char* data){
@@ -74,21 +76,21 @@ int checkFrame(char* frame, char type, char* out){
 int protocolConnection(int sockfd, char* name){
     //Connection Request
     Frame frame;
-    strcpy(frame.source, DANNY);
-    frame.type = 'C';
-    strcpy(frame.data, name);
+    char buffer[116];
+    char aux[116];
 
-    char* aux = frameToString(frame);
-    printf("Sending: -%s- from %d\n", aux, sockfd);
-    write(sockfd, aux, strlen(aux));
-    free(aux);
+    frame = makeFrame('C', name);
+
+    frameToString(frame, buffer);
+    buffer[115] = '\0';
+
+    //printf("Sending: -%s- from %d\n", buffer, sockfd);
+    write(sockfd, buffer, 115);
 
     //Connection Reply
-    char buffer[115];
-    char buffer2[115];
     read(sockfd, buffer, 115);
 
-    if (checkFrame(buffer, 'O', buffer2) > 0) return 0;
+    if (checkFrame(buffer, 'O', aux) > 0) return 0;
     else return -1;
 }
 
@@ -109,21 +111,22 @@ void stationToString(StationData* station, char* out){
 
 int protocolSend(int sockfd, char type, char* data){
     Frame frame;
+    char buffer[116];
+    char aux[116];
 
     frame = makeFrame(type, data);
 
-    char* aux = frameToString(frame);
-    printf("Sending: -%s- from %d\n", aux, sockfd);
-    write(sockfd, aux, strlen(aux));
-    free(aux);
+    frameToString(frame, buffer);
+    buffer[115] = '\0';
+    printf("Sending: -%s- from %d\n", buffer, sockfd);
+    write(sockfd, buffer, 115);
 
     //Connection Reply
-    char buffer[116];
-    char buffer2[116];
 
     if(type == 'D'){
         read(sockfd, buffer, 115);
-        if (checkFrame(buffer, 'B', buffer2) > 0) return 0;
+        if (checkFrame(buffer, 'B', aux) > 0) return 0;
     }
+
     return -1;
 }

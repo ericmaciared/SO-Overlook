@@ -42,17 +42,25 @@ int checkFrame(char* frame, char type, char* out){
     return 1;
 }
 
-char* frameToString(Frame frame){
-    char* final;
-    final = (char*) malloc(115 * sizeof(char));
+void frameToString(Frame frame, char* final){
+    int flag = 0;
+    int i;
+    bzero(final, 115);
 
-    strcat(final, frame.source);
-    memset(&final[strlen(final)], '$', 14 - strlen(frame.source));
+    for (i = 0; i < 14; i++){
+        if (frame.source[i] == '\0') flag = 1;
+        if (flag) final[i] = '$';
+        else final[i] = frame.source[i];
+    }
+
     final[14] = frame.type;
-    strcat(final, frame.data);
-    memset(&final[strlen(final)], '$', 100 - strlen(frame.data));
 
-    return final;
+    flag = 0;
+    for (i = 15; i < 115; i++){
+        if (frame.data[i-15] == '\0') flag = 1;
+        if (flag) final[i] = '$';
+        else final[i] = frame.data[i-15];
+    }
 }
 
 void stringToStation(char* string, StationData* station){
@@ -172,46 +180,40 @@ Frame makeFrame(char type, char* data){
 int protocolConnection(int sockfdclient, char* out){
     Frame frame;
     char buffer[116];
-    char* buff;
-
+    
     //Connection Request
     read(sockfdclient, buffer, 115);
     buffer[115] = '\0';
 
-    if (checkFrame(buffer, 'C', out) > 0){
-        strcpy(frame.source, JACK);
-        frame.type = 'O';
-        strcpy(frame.data, OK);
+    printf("\nReceived: -%s-\n", buffer);
 
-        buff = frameToString(frame);
-        write(sockfdclient, buff, strlen(buff));
-        free(buff);
+    if (checkFrame(buffer, 'C', out) > 0){
+        frame = makeFrame('O', OK);
+
+        frameToString(frame, buffer);
+        write(sockfdclient, buffer, 115);
         return 0;
     }
-    else{
-        strcpy(frame.source, JACK);
-        frame.type = 'O';
-        strcpy(frame.data, ERROR);
+    else { 
+        frame = makeFrame('E', ERROR);
 
-        buff = frameToString(frame);
-        write(sockfdclient, buff, strlen(buff));
-        free(buff);
+        frameToString(frame, buffer);
+        write(sockfdclient, buffer, 115);
         return -1;
     }
 }
 
 char protocolRead(int sockfdclient, StationData* station){
     char buffer[116];
+    char aux[116];
 
     //Connection Request
-    read(sockfdclient, buffer, 116);
-    buffer[115] = 0;
+    read(sockfdclient, buffer, 115);
+    buffer[115] = '\0';
 
     //Check if atmospheric data
-    char aux[116];
     if (checkFrame(buffer, 'D', aux) > 0){
         //Parse string to Station Data
-
         stringToStation(aux, station);
 
         //Check station data
@@ -225,16 +227,12 @@ char protocolRead(int sockfdclient, StationData* station){
     return 'Z';
 }
 
-void protocolResponse(int sockfdclient, char responseType, char* response){
+void protocolResponse(int sockfdclient, char type, char* response){
     Frame frame;
-    char* buff;
+    char buffer[116];
 
     //Reply with responseType
-    strcpy(frame.source, JACK);
-    frame.type = responseType;
-    strcpy(frame.data, response);
-
-    buff = frameToString(frame);
-    write(sockfdclient, buff, strlen(buff));
-    free(buff);
+    makeFrame(type, response);
+    frameToString(frame, buffer);
+    write(sockfdclient, buffer, 115);
 }

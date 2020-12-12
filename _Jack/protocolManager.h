@@ -64,6 +64,6 @@ char protocolRead(int sockfdclient, StationData* station);
 /**
  *
  */
-void protocolResponse(int sockfdclient, char responseType, char* response);
+void protocolResponse(int sockfdclient, char type, char* response);
 
 #endif
