@@ -70,19 +70,29 @@ void freeDataStation(StationData* data){
     free(data->precipitationString);
 }
 
-void sendJackData(StationData* station, int fdSocket){
+int sendJackData(StationData* station, int fdSocket){
     //Parse station information to string
     char buffer[100];
+    int type;
     buffer[0] = '\0';
 
     stationToString(station, buffer);
 
-    if(protocolSend(fdSocket, 'D', buffer) < 0){
-        print("Error sending data\n");
-    }
-    else{
+    type = protocolSend(fdSocket, 'D', buffer);
+    
+    switch (type){
+    case 0:
         print("Data sent successfully\n");
-    }
+        break;
+    
+    case -1:
+        print("Error sending data\n");
+        break;
+
+    case -2:
+        print("Error reaching Jack\n");
+        break; 
+    return type;
 }
 
 
@@ -166,7 +176,7 @@ int connectToJack(Data* data, Station station){
     return sockfd;
 }
 
-void scanDirectory(Data* data, int fdSocket){
+int scanDirectory(Data* data, int fdSocket){
     DIR* d;
     char buffer[32];
     struct dirent* dir = NULL;
@@ -217,7 +227,7 @@ void scanDirectory(Data* data, int fdSocket){
                         //remove(buffer);
 
                         //Send to Jack
-                        sendJackData(&station, fdSocket);
+                        if(sendJackData(&station, fdSocket) == -2) return -1;
 
                         freeDataStation(&station);
                         break;
@@ -241,6 +251,7 @@ void scanDirectory(Data* data, int fdSocket){
     }
 
     print(EOL);
+    return 0;
 }
 
 void disconnectJack(Station* station){
