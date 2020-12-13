@@ -19,7 +19,6 @@
 #ifndef __USE_XOPEN
 #define __USE_XOPEN
 #endif
-
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
@@ -77,7 +76,7 @@ typedef struct
  * @return int The result of the operation executed
  */
 
-int SEM_constructor_with_name(semaphore * sem, key_t key) {
+inline static int SEM_constructor_with_name(semaphore * sem, key_t key) {
 
     // IPC_CREAT: if this is specified, and a semaphore with the given key does not exist, it is created, otherwise the call returns with -1, setting the appropriate errno value.
     sem->shmid = semget(key, 1, IPC_CREAT | 0644);
@@ -98,7 +97,7 @@ int SEM_constructor_with_name(semaphore * sem, key_t key) {
  * @param sem The var where semaphore will be created
  * @return int The result of the operation executed
  */
-int SEM_constructor (semaphore * sem)
+inline static int SEM_constructor (semaphore * sem)
 {
 	assert (sem != NULL);
 	sem->shmid = semget (IPC_PRIVATE, 1, IPC_CREAT | 0600);
@@ -113,7 +112,7 @@ int SEM_constructor (semaphore * sem)
  *          initialized
  * @return int The result of the operation executed
  */
-int SEM_init (const semaphore * sem, const int v)
+inline static int SEM_init (const semaphore * sem, const int v)
 {
 	unsigned short _v[1] = {v};
 	assert (sem != NULL);
@@ -125,7 +124,7 @@ int SEM_init (const semaphore * sem, const int v)
  * @param sem The semaphore to destroy
  * @return int The result of the operation executed
  */
-int SEM_destructor (const semaphore * sem)
+inline static int SEM_destructor (const semaphore * sem)
 {
 	assert (sem != NULL);
 	return semctl (sem->shmid, 0, IPC_RMID, NULL);
@@ -139,7 +138,7 @@ int SEM_destructor (const semaphore * sem)
  * @param sem The semaphore where wait operation will be applied
  * @return int The result of the operation executed
  */
-int SEM_wait (const semaphore * sem)
+inline static int SEM_wait (const semaphore * sem)
 {
 	struct sembuf o = {0, -1, SEM_UNDO};
 
@@ -157,7 +156,7 @@ int SEM_wait (const semaphore * sem)
  *            applied
  * @return int The result of the operation executed
  */
-int SEM_signal (const semaphore * sem)
+inline static int SEM_signal (const semaphore * sem)
 {
 	struct sembuf o = {0, 1, SEM_UNDO};
 	assert (sem != NULL);

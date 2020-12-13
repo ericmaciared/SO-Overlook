@@ -7,7 +7,7 @@ OBJ = lloyd.o lloydManager.o functions.o
 	@echo "Compiling project"
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-jack: $(OBJ)
+lloyd: $(OBJ)
 	@echo "Working on lloyd"
 	$(CC) -o $@ $^ $(CFLAGS)
 	@echo "Done!"
