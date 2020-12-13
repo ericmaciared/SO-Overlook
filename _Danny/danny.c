@@ -52,12 +52,11 @@ int main(int argc, char const *argv[]){
         scanDirectory(&data, station.sockfd);
         sleep(data.time);
     }
-
-    print(EOL);
-    print(DISCONNECT_DANNY);
+    
     disconnectJack(&station);
 
     freeConfig(&data);
+    print(DISCONNECT_DANNY);
 
     return 0;
 }

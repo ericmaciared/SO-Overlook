@@ -23,12 +23,12 @@
 #define ERROR_ACCEPT "Error accepting new connection\n\n"
 #define ERROR_THREAD "Error creating new thread\n\n"
 
-#define JACK_PROMPT "$Jack:\n"
-#define STARTING "\nStarting Jack...\n\n"
+#define JACK_PROMPT "\n$Jack:\n"
+#define STARTING "\nStarting Jack...\n"
 #define DISCONNECTING "\nDisconnecting Jack...\n\n"
 #define BYEDANNY "Disconnecting Danny (%s)\n\n"
 #define CONNECTION_WAITING "Waiting...\n"
-#define NEW_CONNECTION "New connection: %s\n\n"
+#define NEW_CONNECTION "New connection: %s\n"
 #define RECEIVING_DATA "Receiving data...\n"
 
 

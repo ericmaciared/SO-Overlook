@@ -47,6 +47,8 @@ void frameToString(Frame frame, char* final){
     int i;
     bzero(final, 115);
 
+    //printf("Frame: -%s- -%c- -%s-\n", frame.source, frame.type, frame.data);
+
     for (i = 0; i < 14; i++){
         if (frame.source[i] == '\0') flag = 1;
         if (flag) final[i] = '$';
@@ -161,13 +163,13 @@ int checkStation(StationData* data){
     strcpy(aux, data->precipitationString);
     if(strlen(aux)>4)return -1;
 
-
     return 0;
 }
 
-
 Frame makeFrame(char type, char* data){
     Frame frame;
+    bzero(frame.source, 14);
+    bzero(frame.data, 100);
     strcpy(frame.source, JACK);
     frame.type = type;
     strcpy(frame.data, data);
@@ -185,10 +187,9 @@ int protocolConnection(int sockfdclient, char* out){
     read(sockfdclient, buffer, 115);
     buffer[115] = '\0';
 
-    printf("\nReceived: -%s-\n", buffer);
-
     if (checkFrame(buffer, 'C', out) > 0){
         frame = makeFrame('O', OK);
+        bzero(buffer, 116);
 
         frameToString(frame, buffer);
         write(sockfdclient, buffer, 115);
@@ -196,7 +197,7 @@ int protocolConnection(int sockfdclient, char* out){
     }
     else { 
         frame = makeFrame('E', ERROR);
-
+        bzero(buffer, 116);
         frameToString(frame, buffer);
         write(sockfdclient, buffer, 115);
         return -1;
@@ -229,10 +230,12 @@ char protocolRead(int sockfdclient, StationData* station){
 
 void protocolResponse(int sockfdclient, char type, char* response){
     Frame frame;
+
     char buffer[116];
+    bzero(buffer, 116);
 
     //Reply with responseType
-    makeFrame(type, response);
+    frame = makeFrame(type, response);
     frameToString(frame, buffer);
     write(sockfdclient, buffer, 115);
 }

@@ -25,6 +25,7 @@
 #define ERROR_IP "Error processing invalid IP\n\n"
 #define ERROR_CONNECT "Error connecting to server\n\n"
 
+#define DANNY_PROMPT "\n$%s\n"
 #define STARTING "\nStarting Danny...\n\n"
 #define CONNECTING_JACK "Connecting Jack...\n"
 #define CONNECTED_JACK "Connected to Jack.\n"

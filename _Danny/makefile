@@ -10,6 +10,7 @@ OBJ = danny.o dannyManager.o protocolManager.o functions.o
 danny: $(OBJ)
 	@echo "Working on danny"
 	$(CC) -o $@ $^ $(CFLAGS)
+	rm *.o
 	@echo "Done!"
 
 .PHONY: clean

@@ -83,7 +83,6 @@ void sendJackData(StationData* station, int fdSocket){
     else{
         print("Data sent successfully\n");
     }
-
 }
 
 
@@ -178,7 +177,7 @@ void scanDirectory(Data* data, int fdSocket){
     files = (char**) malloc(sizeof(char*));
 
     //check for new files
-    sprintf(buffer, "$%s:\n", data->station);
+    sprintf(buffer, DANNY_PROMPT, data->station);
     print(buffer);
     print(TESTING);
 

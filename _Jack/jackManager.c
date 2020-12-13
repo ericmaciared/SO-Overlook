@@ -113,6 +113,8 @@ char readFromDanny(Station* client){
     char type = protocolRead(client->sockfd, &sd);
 
     //Read frame
+    print(JACK_PROMPT);
+    print(RECEIVING_DATA);
     switch(type){
         case 'D':
             //Send data Lloyd
@@ -128,6 +130,7 @@ char readFromDanny(Station* client){
 
         default:
             //Erroneous frame
+
             return 'K';
             break;
     }
@@ -139,19 +142,13 @@ int replyToDanny(Station* client, char type){
     switch(type){
         case 'D':
             protocolResponse(client->sockfd, 'B', DATAOK);
-            print(DATAOK);
-            print(EOL);
 
             return 0;
-            break;
 
         case 'K':
-            protocolResponse(client->sockfd, type, DATAKO);
-            print(DATAKO);
-            print(EOL);
+            protocolResponse(client->sockfd, 'K', DATAKO);
 
             return 0;
-            break;
 
         case 'Q':
             //Disconnect Server
@@ -162,7 +159,6 @@ int replyToDanny(Station* client, char type){
             free(client);
 
             return 1;
-            break;
 
         default:
             //Erroneous processing

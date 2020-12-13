@@ -120,9 +120,8 @@ int protocolSend(int sockfd, char type, char* data){
     buffer[115] = '\0';
     printf("Sending: -%s- from %d\n", buffer, sockfd);
     write(sockfd, buffer, 115);
-
-    //Connection Reply
-
+    bzero(buffer, 116);
+    
     if(type == 'D'){
         read(sockfd, buffer, 115);
         if (checkFrame(buffer, 'B', aux) > 0) return 0;

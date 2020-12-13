@@ -10,6 +10,7 @@ OBJ = jack.o jackManager.o protocolManager.o functions.o
 jack: $(OBJ)
 	@echo "Working on jack"
 	$(CC) -o $@ $^ $(CFLAGS)
+	rm *.o
 	@echo "Done!"
 
 .PHONY: clean

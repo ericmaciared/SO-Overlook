@@ -16,13 +16,18 @@ int terminate = 0;
 //FUNCTIONS
 static void* handleDanny(void* args){
     Station* client = (Station *) args;
+    char type = 0;
+
     while (!terminate){
-        print(JACK_PROMPT);
-        print(RECEIVING_DATA);
-        terminate = replyToDanny(client, readFromDanny(client));
+        type = readFromDanny(client);
+
+        if (type == 'Q') terminate = 1;
+        else replyToDanny(client, type);
+
         sleep(1);
     }
-
+    
+    print("Closing client\n");
     //TODO: closeStation(client); //protocol disconnection
 
     //close(client->sockfd);
