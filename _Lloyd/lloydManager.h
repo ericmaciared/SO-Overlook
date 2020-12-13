@@ -22,6 +22,7 @@
 #define ERROR_ACCEPT "Error accepting new connection\n\n"
 #define ERROR_THREAD "Error creating new thread\n\n"
 #define ERROR_SHARED_MEMORY "Error creating shared memory\n\n"
+#define ERROR_FILE "Error opening file"
 
 #define LLOYD_PROMPT "$Lloyd:\n"
 #define STARTING "\nStarting Lloyd...\n\n"
@@ -30,8 +31,9 @@
 #define RECEIVING_DATA "Receiving data...\n"
 #define PROCESSED_DATA "Data processed correctly!\n"
 #define LLOYD_FILE_REWRITE "Rewriting Hallorann.txt\n"
+#define STATION_STATISTICS "%s\n\tTemperature: %f\n\tHumidity: %f%%\n\tPressure: %f\n\tPrecipitation: %f\n\n"
 
-#define REWRITE_TIME 120
+#define REWRITE_TIME 20
 
 typedef struct StationData{
     char* nameString;
@@ -55,10 +57,10 @@ typedef struct StationStatistics{
 /**
  * This will create the shared memory address and
  * initialize the stations data array
- * @param: stations statistics pointer to be initialized
+ * @param:
  * @return: pointer of the shared memory address
  */
-StationData* initMemory(StationStatistics** stations);
+StationData* initMemory();
 
 /**
  * This function will be in charge of managing the communication
@@ -66,7 +68,7 @@ StationData* initMemory(StationStatistics** stations);
  * @param:
  * @return: int value for new client socket for error control
  */
-int jackCommunication(StationData* shared, StationStatistics* stations);
+int jackCommunication(StationData* shared, StationStatistics* stations, semaphore* sem_dataReady, semaphore* sem_dataProcessed, int* numStations);
 
 /**
  * This function will read station data in the shared memory
@@ -75,14 +77,14 @@ int jackCommunication(StationData* shared, StationStatistics* stations);
  * @param: station pointer to struct with name and socket fd
  * @return: char value for new response from server
  */
-int readFromMemory(StationData* shared, StationStatistics** stations);
+int readFromMemory(StationData* shared, StationStatistics* stations, int* numStations);
 
 /**
  * This function will write the statistics to the Hallorann.txt
  * @param: station pointer to array of data to write
  * @return: int value for error control
  */
-void writeToFile(StationStatistics* stations);
+void writeToFile(StationStatistics* stations, const char* file);
 
 /**
  * This function will free the shared memory with Jack
