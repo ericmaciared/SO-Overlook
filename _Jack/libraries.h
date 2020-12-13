@@ -23,7 +23,12 @@
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <ctype.h>
 #include <time.h>
 #include <math.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
+#include "semaphore_v2.h"
 
 #endif
