@@ -128,6 +128,10 @@ char readFromDanny(Station* client){
         case 'Q':
             break;
 
+        case -1:
+        //Read interruption
+            break;
+
         default:
             //Erroneous frame
 
@@ -142,12 +146,10 @@ int replyToDanny(Station* client, char type){
     switch(type){
         case 'D':
             protocolResponse(client->sockfd, 'B', DATAOK);
-
             return 0;
 
         case 'K':
             protocolResponse(client->sockfd, 'K', DATAKO);
-
             return 0;
 
         case 'Q':
@@ -176,3 +178,6 @@ int replyToDanny(Station* client, char type){
     }
     return -1;
 }
+
+
+

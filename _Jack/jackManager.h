@@ -87,4 +87,5 @@ char readFromDanny(Station* client);
  */
 int replyToDanny(Station* client, char responseType);
 
+
 #endif

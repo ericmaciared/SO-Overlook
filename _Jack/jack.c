@@ -16,21 +16,26 @@ int terminate = 0;
 //FUNCTIONS
 static void* handleDanny(void* args){
     Station* client = (Station *) args;
+    char buffer[64];
     char type = 0;
 
     while (!terminate){
         type = readFromDanny(client);
 
-        if (type == 'Q') terminate = 1;
+        printf("Type value = -%c-\n", type);
+
+        if (type == 'Q') break;
         else replyToDanny(client, type);
 
         sleep(1);
     }
-    
-    print("Closing client\n");
-    //TODO: closeStation(client); //protocol disconnection
 
-    //close(client->sockfd);
+    sprintf(buffer, "Closing %s station.\n", client->name);
+    print(buffer);
+
+    //Close client socket
+    close(client->sockfd);
+
     return (void *) client;
 }
 
@@ -38,7 +43,9 @@ void ksighandler(){
     finish = 1;
     terminate = 1;
 
-    exit(EXIT_FAILURE);
+    printf("Executing termination\n");
+
+    //exit(EXIT_FAILURE);
 }
 
 int main(int argc, char const *argv[]){
@@ -80,8 +87,13 @@ int main(int argc, char const *argv[]){
     }
 
     print(DISCONNECTING);
-    //TODO: Wait for all threads to join
 
+    //TODO: Wait for all threads to join
+    for (int j = 0; j < i; j++){
+        pthread_join(tid[j], NULL);
+    }
+    
+    printf("All threads returned\n");
     //TODO: Free all dynamic data
 
     return 0;

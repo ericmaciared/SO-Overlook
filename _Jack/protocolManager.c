@@ -207,9 +207,12 @@ int protocolConnection(int sockfdclient, char* out){
 char protocolRead(int sockfdclient, StationData* station){
     char buffer[116];
     char aux[116];
+    int res = 0;
 
     //Connection Request
-    read(sockfdclient, buffer, 115);
+    res = read(sockfdclient, buffer, 115);
+    if (res == EINTR) return -1;
+    
     buffer[115] = '\0';
 
     //Check if atmospheric data

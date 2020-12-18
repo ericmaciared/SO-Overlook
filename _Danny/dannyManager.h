@@ -87,7 +87,7 @@ int connectToJack(Data* data, Station station);
  * sending and processing of information
  * @param: data pointer to structure with config information
  */
-void scanDirectory(Data* data, int fdSocket);
+int scanDirectory(Data* data, int fdSocket);
 
 /**
  * Sends Jack a Disconnection message and leaves

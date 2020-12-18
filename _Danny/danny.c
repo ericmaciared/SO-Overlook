@@ -49,11 +49,11 @@ int main(int argc, char const *argv[]){
 
     //Scan directory
     while (!finish){
-        scanDirectory(&data, station.sockfd);
+        if (scanDirectory(&data, station.sockfd) < 0) break;
         sleep(data.time);
     }
     
-    disconnectJack(&station);
+    if (finish) disconnectJack(&station);
 
     freeConfig(&data);
     print(DISCONNECT_DANNY);

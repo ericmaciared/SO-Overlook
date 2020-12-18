@@ -119,7 +119,7 @@ int protocolSend(int sockfd, char type, char* data){
     frameToString(frame, buffer);
     buffer[115] = '\0';
     printf("Sending: -%s- from %d\n", buffer, sockfd);
-    write(sockfd, buffer, 115);
+    if(write(sockfd, buffer, 115) != 115) return -2;
     bzero(buffer, 116);
     
     if(type == 'D'){
