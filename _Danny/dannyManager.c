@@ -92,6 +92,8 @@ int sendJackData(StationData* station, int fdSocket){
     case -2:
         print("Error reaching Jack\n");
         break; 
+    }
+    
     return type;
 }
 

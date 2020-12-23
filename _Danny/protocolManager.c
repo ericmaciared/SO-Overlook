@@ -43,7 +43,7 @@ int checkFrame(char* frame, char type, char* out){
 
     //Get source
     for (int i = 0; i < 14; i++){
-        if (frame[i] == '$'){
+        if (frame[i] == '\0' || frame[i] == '$'){
             newFrame.source[i] = '\0';
             break;
         }
@@ -55,7 +55,7 @@ int checkFrame(char* frame, char type, char* out){
 
     //Get data
     for (int i = 15; i < 115; i++){
-        if (frame[i] == '$'){
+        if (frame[i] == '\0' || frame[i] == '$'){
             newFrame.data[i-15] = '\0';
             break;
         }
@@ -118,7 +118,7 @@ int protocolSend(int sockfd, char type, char* data){
 
     frameToString(frame, buffer);
     buffer[115] = '\0';
-    printf("Sending: -%s- from %d\n", buffer, sockfd);
+    //printf("Sending: -%s- from %d\n", buffer, sockfd);
     if(write(sockfd, buffer, 115) != 115) return -2;
     bzero(buffer, 116);
     

@@ -22,12 +22,12 @@ static void* handleDanny(void* args){
     while (!terminate){
         type = readFromDanny(client);
 
-        printf("Type value = -%c-\n", type);
+        //printf("Type value = -%c-\n", type);
 
-        if (type == 'Q') break;
+        if (type == 'Q' || type == 'X') break;
         else replyToDanny(client, type);
 
-        sleep(1);
+        //sleep(1);
     }
 
     sprintf(buffer, "Closing %s station.\n", client->name);
@@ -44,8 +44,7 @@ void ksighandler(){
     terminate = 1;
 
     printf("Executing termination\n");
-
-    //exit(EXIT_FAILURE);
+    signal(SIGINT, ksighandler);
 }
 
 int main(int argc, char const *argv[]){
@@ -83,7 +82,7 @@ int main(int argc, char const *argv[]){
             close(client.sockfd);
             break;
         }
-        sleep(5);
+        //sleep(5);
     }
 
     print(DISCONNECTING);

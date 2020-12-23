@@ -89,7 +89,7 @@ int acceptConnection(int sockfdServer, Station* client){
 
     //Waits for connection from client
     client->sockfd = accept(sockfdServer, (void *) &s_addr, &len);
-    if (client->sockfd < 0){
+    if (client->sockfd < 0 || errno == EINTR){
         print(ERROR_ACCEPT);
         return -1;
     }
@@ -113,10 +113,10 @@ char readFromDanny(Station* client){
     char type = protocolRead(client->sockfd, &sd);
 
     //Read frame
-    print(JACK_PROMPT);
-    print(RECEIVING_DATA);
     switch(type){
         case 'D':
+            print(JACK_PROMPT);
+            print(RECEIVING_DATA);
             //Send data Lloyd
             //Print to screen
             showStationData(&sd);
@@ -126,18 +126,26 @@ char readFromDanny(Station* client){
             break;
 
         case 'Q':
+            print("Danny exit\n");
             break;
 
-        case -1:
-        //Read interruption
+        case 'X':
+            //Read interruption
+            print("Reading interruption\n");
             break;
 
-        default:
+        case 'K':
             //Erroneous frame
+            print("Erroneous Frame\n");
 
-            return 'K';
+            //sendtodanny('K')
+            break;
+        
+        default:
+            //sendtodanny('Z')
             break;
     }
+
     return type;
 }
 
