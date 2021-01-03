@@ -28,6 +28,7 @@
 #include <math.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <poll.h>
 
 //#include "semaphore_v2.h"
 

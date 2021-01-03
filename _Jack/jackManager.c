@@ -89,6 +89,7 @@ int acceptConnection(int sockfdServer, Station* client){
 
     //Waits for connection from client
     client->sockfd = accept(sockfdServer, (void *) &s_addr, &len);
+
     if (client->sockfd < 0 || errno == EINTR){
         print(ERROR_ACCEPT);
         return -1;
@@ -140,7 +141,7 @@ char readFromDanny(Station* client){
 
             //sendtodanny('K')
             break;
-        
+
         default:
             //sendtodanny('Z')
             break;
@@ -186,6 +187,3 @@ int replyToDanny(Station* client, char type){
     }
     return -1;
 }
-
-
-
