@@ -13,7 +13,7 @@
 //DEFINES
 
 //GLOBAL
-int finish = 0;
+int volatile finish = 0;
 
 //FUNCTIONS
 void ksighandler(){
@@ -23,6 +23,8 @@ void ksighandler(){
 int main(int argc, char const *argv[]){
     Data data;
     Station station;
+    time_t timeout;
+    struct pollfd pfd;
 
     print(STARTING);
 
@@ -48,9 +50,20 @@ int main(int argc, char const *argv[]){
     }
 
     //Scan directory
+    pfd.fd = station.sockfd;
+    pfd.events = POLLIN | POLLHUP;
     while (!finish){
         if (scanDirectory(&data, station.sockfd) < 0) break;
-        sleep(data.time);
+
+        timeout = time(NULL);
+        while (time(NULL) - timeout <= data.time || finish){
+            if (poll(&pfd, 1, 0) >= 0){
+                if ((pfd.revents & POLLIN) || (pfd.revents & POLLHUP)){
+                    finish = 1;
+                    break;
+                }
+            }
+        }
     }
     
     if (finish) disconnectJack(&station);

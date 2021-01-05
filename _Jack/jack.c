@@ -10,8 +10,8 @@
 #include "jackManager.h"
 
 //GLOBAL
-int finish = 0;
-int terminate = 0;
+int volatile finish = 0;
+int volatile terminate = 0;
 
 //FUNCTIONS
 void ksighandler(){
@@ -20,15 +20,27 @@ void ksighandler(){
 
     printf("Executing termination\n");
     signal(SIGINT, ksighandler);
+    close(STDIN_FILENO);
 }
 
 static void* handleDanny(void* args){
     Station* client = (Station *) args;
     char buffer[64];
     char type = 0;
+    struct pollfd pfd;
+    
+    pfd.fd = client->sockfd;
+    pfd.events = POLLIN;
 
     while (!terminate){
-        type = readFromDanny(client);
+        while (!terminate){
+            if (poll(&pfd, 1, 0) >= 0){
+                if (pfd.revents & POLLIN){
+                    type = readFromDanny(client);
+                    break;
+                }
+            }
+        }
 
         //printf("Type value = -%c-\n", type);
 
@@ -50,16 +62,10 @@ static void* handleDanny(void* args){
 int main(int argc, char const *argv[]){
     Config config;
     int sockfd;
-    char buffer[64];
     Station client;
     pthread_t tid[32];
-    int i = 0, ready = 0;
-    int nfds = 1;
-    struct pollfd *pfds;
-
-    //Set pdfs for polling
-    pfds = calloc(1, sizeof(struct pollfd));
-    if (pfds == NULL) exit(EXIT_FAILURE);
+    int i = 0;
+    struct pollfd pfd;
 
     //Reprogram signals
     signal(SIGINT, ksighandler);
@@ -78,20 +84,13 @@ int main(int argc, char const *argv[]){
     sockfd = initServer(&config);
     if (sockfd < 0) exit(EXIT_FAILURE);
 
-    pfds[0].fd = sockfd;
-    pfds[0].events = POLLIN;
-
     //Accept connections and assign threads indefinitely
-    while (!finish) {
-        ready = poll (pfds, nfds, -1);
-        if(ready == -1) exit(EXIT_FAILURE);
-        if (pfds[0].revents != 0) {
-            printf("fd=%d; events: %s%s%s\n", pfds[0].fd,
-                    (pfds[0].revents & POLLIN)  ? "POLLIN "  : "",
-                    (pfds[0].revents & POLLHUP) ? "POLLHUP " : "",
-                    (pfds[0].revents & POLLERR) ? "POLLERR " : "");
+    pfd.fd = sockfd;
+    pfd.events = POLLIN;
 
-            if (pfds[0].revents & POLLIN) {
+    while (!finish) {
+        if (poll(&pfd, 1, 0) >= 0) {
+            if (pfd.revents & POLLIN){
                 if (acceptConnection(sockfd, &client) < 0 || terminate) break;
                 if (pthread_create(&tid[i++], NULL, handleDanny, &client) != 0){
                     print(ERROR_THREAD);
@@ -99,23 +98,14 @@ int main(int argc, char const *argv[]){
                     close(client.sockfd);
                     break;
                 }
-            } else {
-                /* POLLERR | POLLHUP */
-                sprintf(buffer, "Closing fd %d\n", pfds[0].fd);
-                print(buffer);
-                if (close(pfds[0].fd) == -1){
-                    exit(EXIT_FAILURE);
-                    break;
-                }
-            }
+            } 
         }
-        //sleep(5);
     }
 
     print(DISCONNECTING);
 
     //TODO: Wait for all threads to join
-    for (int j = 0; j <= i; j++){
+    for (int j = 0; j < i; j++){
         pthread_join(tid[j], NULL);
     }
 

@@ -20,6 +20,7 @@
 #include <strings.h>
 #include <signal.h>
 #include <stdarg.h>
+#include <poll.h>
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
