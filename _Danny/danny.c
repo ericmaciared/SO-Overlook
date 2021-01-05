@@ -17,6 +17,7 @@ int volatile finish = 0;
 
 //FUNCTIONS
 void ksighandler(){
+    printf("Shutting down.\n");
     finish = 1;
 }
 
@@ -56,7 +57,7 @@ int main(int argc, char const *argv[]){
         if (scanDirectory(&data, station.sockfd) < 0) break;
 
         timeout = time(NULL);
-        while (time(NULL) - timeout <= data.time || finish){
+        while (time(NULL) - timeout <= data.time && !finish){
             if (poll(&pfd, 1, 0) >= 0){
                 if ((pfd.revents & POLLIN) || (pfd.revents & POLLHUP)){
                     finish = 1;
