@@ -84,7 +84,7 @@ int protocolConnection(int sockfd, char* name){
     frameToString(frame, buffer);
     buffer[115] = '\0';
 
-    //printf("Sending: -%s- from %d\n", buffer, sockfd);
+    printf("Sending: -%s- from %d\n", buffer, sockfd);
     write(sockfd, buffer, 115);
 
     //Connection Reply
@@ -113,13 +113,15 @@ int protocolSend(int sockfd, char type, char* data){
     Frame frame;
     char buffer[116];
     char aux[116];
+    bzero(buffer, 0);
 
     frame = makeFrame(type, data);
 
     frameToString(frame, buffer);
     buffer[115] = '\0';
-    //printf("Sending: -%s- from %d\n", buffer, sockfd);
-    if(write(sockfd, buffer, 115) != 115) return -2;
+    
+    printf("Sending: -%s- from %d\n", buffer, sockfd);
+    if(write(sockfd, buffer, 115) != 115) return -1;
     bzero(buffer, 116);
     
     if(type == 'D'){

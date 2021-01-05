@@ -219,18 +219,11 @@ char protocolRead(int sockfdclient, StationData* station){
     char buffer[116];
     char aux[116];
     bzero(buffer, 0);
+    bzero(aux, 0);
 
     //Connection Request
-    if (read(sockfdclient, buffer, 115) < 0){
-        print("READ INTERRUPTED\n");
-        sprintf(aux, "ERRNO: %d\n", errno);
-        print(aux);
-        if (errno == EINTR) return 'X';
-    }
-
-    sprintf(aux, "ERRNO: %d\n", errno);
-    print(aux);
-    
+    read(sockfdclient, buffer, 115);
+    buffer[115] = 0;
 
     print("Received: ");
 
@@ -239,12 +232,9 @@ char protocolRead(int sockfdclient, StationData* station){
         print(aux);
     }
 
-    buffer[115] = 0;
-
     //Check if atmospheric data
     if (checkFrame(buffer, 'D', aux) > 0){
         //Parse string to Station Data
-
         stringToStation(aux, station);
 
         //Check station data
@@ -269,5 +259,4 @@ void protocolResponse(int sockfdclient, char responseType, char* response){
 
     frameToString(frame, buffer);
     write(sockfdclient, buffer, 115);
-    //free(buff);
 }

@@ -18,9 +18,7 @@ void ksighandler(){
     finish = 1;
     terminate = 1;
 
-    printf("Executing termination\n");
     signal(SIGINT, ksighandler);
-    close(STDIN_FILENO);
 }
 
 static void* handleDanny(void* args){
@@ -42,12 +40,9 @@ static void* handleDanny(void* args){
             }
         }
 
-        //printf("Type value = -%c-\n", type);
-
         if (type == 'Q' || type == 'X') break;
         else replyToDanny(client, type);
 
-        //sleep(1);
     }
 
     sprintf(buffer, "Closing %s station.\n", client->name);
@@ -62,7 +57,7 @@ static void* handleDanny(void* args){
 int main(int argc, char const *argv[]){
     Config config;
     int sockfd;
-    Station client;
+    Station clients[32];
     pthread_t tid[32];
     int i = 0;
     struct pollfd pfd;
@@ -82,8 +77,10 @@ int main(int argc, char const *argv[]){
 
     //Create socket
     sockfd = initServer(&config);
-    if (sockfd < 0) exit(EXIT_FAILURE);
-
+    if (sockfd < 0) {
+        
+        exit(EXIT_FAILURE);
+    }
     //Accept connections and assign threads indefinitely
     pfd.fd = sockfd;
     pfd.events = POLLIN;
@@ -91,13 +88,17 @@ int main(int argc, char const *argv[]){
     while (!finish) {
         if (poll(&pfd, 1, 0) >= 0) {
             if (pfd.revents & POLLIN){
-                if (acceptConnection(sockfd, &client) < 0 || terminate) break;
-                if (pthread_create(&tid[i++], NULL, handleDanny, &client) != 0){
+                if (acceptConnection(sockfd, &clients[i]) < 0 || terminate) break;
+                if (pthread_create(&tid[i], NULL, handleDanny, &clients[i]) != 0){
                     print(ERROR_THREAD);
+                    close(clients[i].sockfd);
                     i--;
-                    close(client.sockfd);
                     break;
                 }
+                else{
+                    i++;
+                }
+                
             } 
         }
     }
@@ -108,9 +109,12 @@ int main(int argc, char const *argv[]){
     for (int j = 0; j < i; j++){
         pthread_join(tid[j], NULL);
     }
-
-    printf("All threads returned\n");
+    
     //TODO: Free all dynamic data
+    free(config.ip);
+    for (int j = 0; j < i; j++){
+        free(clients[j].name);
+    }
 
     return 0;
 }

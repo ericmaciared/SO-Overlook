@@ -47,6 +47,7 @@ int processConfig(Config* config, const char* file){
         config->ip = readUntil(fd, '\n');
         buffer = readUntil(fd, '\n');
         config->port = atoi(buffer);
+        free(buffer);
     }
     return 1;
 }
@@ -126,15 +127,6 @@ char readFromDanny(Station* client){
             freeStationData(&sd);
             break;
 
-        case 'Q':
-            print("Danny exit\n");
-            break;
-
-        case 'X':
-            //Read interruption
-            print("Reading interruption\n");
-            break;
-
         case 'K':
             //Erroneous frame
             print("Erroneous Frame\n");
@@ -181,7 +173,7 @@ int replyToDanny(Station* client, char type){
             //Disconnect Server
             close(client->sockfd);
             free(client->name);
-            free(client);
+            //free(client);
 
             return 1;
     }

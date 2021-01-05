@@ -73,28 +73,11 @@ void freeDataStation(StationData* data){
 int sendJackData(StationData* station, int fdSocket){
     //Parse station information to string
     char buffer[100];
-    int type;
     buffer[0] = '\0';
 
     stationToString(station, buffer);
 
-    type = protocolSend(fdSocket, 'D', buffer);
-    
-    switch (type){
-    case 0:
-        print("Data sent successfully\n");
-        break;
-    
-    case -1:
-        print("Error sending data\n");
-        break;
-
-    case -2:
-        print("Error reaching Jack\n");
-        break; 
-    }
-    
-    return type;
+    return protocolSend(fdSocket, 'D', buffer);
 }
 
 
@@ -115,16 +98,19 @@ int processConfig(Data* data, const char* file){
 
         aux = readUntil(fd, '\n');
         data->time = atoi(aux);
+        free(aux);
 
         data->jack.ip = readUntil(fd, '\n');
 
         aux = readUntil(fd, '\n');
         data->jack.port = atoi(aux);
+        free(aux);
 
         data->wendy.ip = readUntil(fd, '\n');
 
         aux = readUntil(fd, '\n');
         data->wendy.port = atoi(aux);
+        free(aux);
 
         close(fd);
     }
@@ -229,7 +215,9 @@ int scanDirectory(Data* data, int fdSocket){
                         //remove(buffer);
 
                         //Send to Jack
-                        if(sendJackData(&station, fdSocket) == -2) return -1;
+                        if (sendJackData(&station, fdSocket) < 0){
+                            print("ERROR sending data to jack\n");
+                        }
 
                         freeDataStation(&station);
                         break;

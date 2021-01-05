@@ -13,11 +13,10 @@
 //DEFINES
 
 //GLOBAL
-int volatile finish = 0;
+int finish = 0;
 
 //FUNCTIONS
 void ksighandler(){
-    printf("Shutting down.\n");
     finish = 1;
 }
 
@@ -47,6 +46,7 @@ int main(int argc, char const *argv[]){
     station.name = data.station;
     station.sockfd = connectToJack(&data, station);
     if(station.sockfd < 0){
+        freeConfig(&data);
         exit(EXIT_FAILURE);
     }
 
