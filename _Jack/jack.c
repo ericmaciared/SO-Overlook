@@ -8,6 +8,8 @@
 #include "libraries.h"
 #include "functions.h"
 #include "jackManager.h"
+#include "lloydManager.h"
+
 
 //GLOBAL
 int volatile finish = 0;
@@ -26,7 +28,7 @@ static void* handleDanny(void* args){
     char buffer[64];
     char type = 0;
     struct pollfd pfd;
-    
+
     pfd.fd = client->sockfd;
     pfd.events = POLLIN;
 
@@ -59,7 +61,7 @@ int main(int argc, char const *argv[]){
     int sockfd;
     Station clients[32];
     pthread_t tid[32];
-    int i = 0;
+    int i = 1;
     struct pollfd pfd;
 
     //Reprogram signals
@@ -75,10 +77,15 @@ int main(int argc, char const *argv[]){
     if(!processConfig(&config, argv[argc -1])) exit(EXIT_FAILURE);
     print(STARTING);
 
+    //Create Thread for Lloyd
+    if (pthread_create(&tid[0], NULL, lloyd, NULL) != 0){
+        print(ERROR_THREAD);
+        print("\nERROR CREATING LLOYD\n");
+    }
+
     //Create socket
     sockfd = initServer(&config);
     if (sockfd < 0) {
-        
         exit(EXIT_FAILURE);
     }
     //Accept connections and assign threads indefinitely
@@ -98,8 +105,8 @@ int main(int argc, char const *argv[]){
                 else{
                     i++;
                 }
-                
-            } 
+
+            }
         }
     }
 
@@ -109,7 +116,7 @@ int main(int argc, char const *argv[]){
     for (int j = 0; j < i; j++){
         pthread_join(tid[j], NULL);
     }
-    
+
     //TODO: Free all dynamic data
     free(config.ip);
     for (int j = 0; j < i; j++){

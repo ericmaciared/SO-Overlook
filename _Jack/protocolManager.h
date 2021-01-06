@@ -48,6 +48,14 @@ typedef struct StationData{
   char* precipitationString;
 } StationData;
 
+typedef struct StationDataShared{
+    char* nameString;
+    float temperature;
+    float humidity;
+    float pressure;
+    float precipitation;
+} StationDataShared;
+
 //FUNCTIONS
 
 /**
