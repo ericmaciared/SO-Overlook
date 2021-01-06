@@ -12,7 +12,7 @@
 #include "libraries.h"
 #include "functions.h"
 #include "protocolManager.h"
-
+#include "semaphore_v2.h"
 
 //DEFINES
 #define EOL "\n"

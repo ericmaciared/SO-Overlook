@@ -12,12 +12,16 @@
 
 
 //GLOBAL
-int volatile finish = 0;
+semaphore sem_dataReady;
+semaphore sem_dataProcessed;
+//int volatile finish = 0;
 int volatile terminate = 0;
+int volatile reading = 0;
+int volatile printing = 0;
 
 //FUNCTIONS
 void ksighandler(){
-    finish = 1;
+    //finish = 1;
     terminate = 1;
 
     signal(SIGINT, ksighandler);
@@ -67,6 +71,13 @@ int main(int argc, char const *argv[]){
     //Reprogram signals
     signal(SIGINT, ksighandler);
 
+    //Create and Init Semaphores
+    SEM_constructor(&sem_dataReady);
+    SEM_init(&sem_dataReady, 0);
+
+    SEM_constructor(&sem_dataProcessed);
+    SEM_init(&sem_dataProcessed, 1);
+
     //Check correct arguments
     if (argc <= 1 || argc > 2){
         print(ERROR_ARGS);
@@ -92,7 +103,7 @@ int main(int argc, char const *argv[]){
     pfd.fd = sockfd;
     pfd.events = POLLIN;
 
-    while (!finish) {
+    while (!terminate) {
         if (poll(&pfd, 1, 0) >= 0) {
             if (pfd.revents & POLLIN){
                 if (acceptConnection(sockfd, &clients[i]) < 0 || terminate) break;
@@ -122,6 +133,9 @@ int main(int argc, char const *argv[]){
     for (int j = 0; j < i; j++){
         free(clients[j].name);
     }
+
+    SEM_destructor(&sem_dataReady);
+    SEM_destructor(&sem_dataProcessed);
 
     return 0;
 }

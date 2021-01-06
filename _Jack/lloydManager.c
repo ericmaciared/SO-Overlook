@@ -12,11 +12,25 @@
 #define FILE_PATH ".Hallorann.txt"
 
 //GLOBAL
+<<<<<<< Updated upstream:_Jack/lloydManager.c
+=======
+<<<<<<< Updated upstream:_Jack/lloydManager.c
+>>>>>>> Stashed changes:_Lloyd/lloydManager.c
 int finish = 0;
 int terminate = 0;
 semaphore sem_dataReady;
 semaphore sem_dataProcessed;
 StationStatistics* stations;
+<<<<<<< Updated upstream:_Jack/lloydManager.c
+=======
+=======
+semaphore sem_dataReady;
+semaphore sem_dataProcessed;
+StationStatistics* stations;
+int volatile finish = 0;
+
+>>>>>>> Stashed changes:_Lloyd/lloydManager.c
+>>>>>>> Stashed changes:_Lloyd/lloydManager.c
 
 //PRIVATE FUNCTIONS
 void showStationStatistics(StationStatistics* station){
@@ -129,7 +143,15 @@ void freeSharedMemory(StationDataShared* shared){
 
 static void* handleTextFile(){
     //signal(SIGINT, ksighandler);
+<<<<<<< Updated upstream:_Jack/lloydManager.c
     while (!terminate){
+=======
+<<<<<<< Updated upstream:_Jack/lloydManager.c
+    while (!terminate){
+=======
+    while (!finish){
+>>>>>>> Stashed changes:_Lloyd/lloydManager.c
+>>>>>>> Stashed changes:_Lloyd/lloydManager.c
         sleep(REWRITE_TIME);
         print(LLOYD_FILE_REWRITE);
         writeToFile(stations, FILE_PATH);
@@ -161,7 +183,14 @@ void* lloyd(){
 
     //Communicate with Jack
     while (!finish) {
+<<<<<<< Updated upstream:_Jack/lloydManager.c
         print("!finish");
+=======
+<<<<<<< Updated upstream:_Jack/lloydManager.c
+        print("!finish");
+=======
+>>>>>>> Stashed changes:_Lloyd/lloydManager.c
+>>>>>>> Stashed changes:_Lloyd/lloydManager.c
         jackCommunication(shared, stations, &sem_dataReady, &sem_dataProcessed, &numStations);
     }
 
