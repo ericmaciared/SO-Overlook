@@ -80,6 +80,50 @@ int sendJackData(StationData* station, int fdSocket){
     return protocolSend(fdSocket, 'D', buffer);
 }
 
+int sendWendyData(char* address, char* file, int fdSocket){
+    pid_t pid;
+    int link[2];
+    char* buffer;
+    char location[128];
+
+    sprintf(location, ".%s/%s", address, file);
+
+    //Get MD5SUM from file
+    printf("Getting MD5SUM from %s\n", location);
+
+    if (pipe(link) < 0) return -1;
+    if ((pid = fork()) < 0) return -1;
+
+    if (pid == 0){
+        char *args[] = {
+            "md5sum",
+            location,
+            NULL
+        };
+        dup2(link[1], 1);
+        execvp(args[0], args);
+        //execlp(location, location, "md5sum", file, NULL);
+    }
+    else{
+        buffer = readUntil(link[0], ' ');
+        wait(NULL);
+        printf("Output: -%s-\n", buffer);
+    }
+
+    close(link[0]);
+    close(link[1]);
+    
+    
+
+    //Send 'I' frame
+
+    //Send 'F' frames
+
+    //Wait for response
+
+    return 0;
+}
+
 
 //PUBLIC FUNCTIONS
 int processConfig(Data* data, const char* file){
@@ -129,10 +173,8 @@ void freeConfig(Data* data){
     data->wendy.ip = NULL;
 }
 
-int connectToJack(Data* data, Station station){
+int connectToServer(Data* data, Station station, int serverId){
     int sockfd = -1;
-
-    print(CONNECTING_JACK);
 
     //Create socket
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -145,9 +187,18 @@ int connectToJack(Data* data, Station station){
 
     memset(&s_addr, 0, sizeof(s_addr));
     s_addr.sin_family = AF_INET;
-    s_addr.sin_port = htons(data->jack.port);
-    s_addr.sin_addr.s_addr = inet_addr(data->jack.ip);
 
+    if (serverId){
+        print(CONNECTING_JACK);
+        s_addr.sin_port = htons(data->jack.port);
+        s_addr.sin_addr.s_addr = inet_addr(data->jack.ip);
+    }
+    else{
+        print(CONNECTING_WENDY);
+        s_addr.sin_port = htons(data->wendy.port);
+        s_addr.sin_addr.s_addr = inet_addr(data->wendy.ip);
+    }
+    
     //Connect to socket
     if (connect(sockfd, (void *) &s_addr, sizeof(s_addr)) < 0){
         print(ERROR_CONNECT);
@@ -160,11 +211,10 @@ int connectToJack(Data* data, Station station){
         return -1;
     }
     
-    print(CONNECTED_JACK);
     return sockfd;
 }
 
-int scanDirectory(Data* data, int fdSocket){
+int scanDirectory(Data* data, Station danny){
     DIR* d;
     char buffer[32];
     struct dirent* dir = NULL;
@@ -175,7 +225,7 @@ int scanDirectory(Data* data, int fdSocket){
     files = (char**) malloc(sizeof(char*));
 
     //check for new files
-    sprintf(buffer, DANNY_PROMPT, data->station);
+    sprintf(buffer, PROMPT, data->station);
     print(buffer);
     print(TESTING);
 
@@ -215,16 +265,26 @@ int scanDirectory(Data* data, int fdSocket){
                         //remove(buffer);
 
                         //Send to Jack
-                        if (sendJackData(&station, fdSocket) < 0){
-                            print("ERROR sending data to jack\n");
+                        if (sendJackData(&station, danny.jacksockfd) < 0){
+                            print("ERROR sending data to Jack.\n");
                         }
 
                         freeDataStation(&station);
                         break;
 
                     case JPG:
-                        //Send to Wendy
+                        print(SENDING_DATA);
+                        print(EOL);
+                        print(files[i]);
+                        print(EOL);
 
+                        //remove(buffer);
+
+                        //Send to Wendy
+                        if (sendWendyData(data->path, files[i], danny.wendysockfd) < 0){
+                            print("ERROR sending data to Wendy.\n");
+                        }
+                        else print(DATA_SENT);
                         break;
 
                     default:
@@ -245,6 +305,11 @@ int scanDirectory(Data* data, int fdSocket){
 }
 
 void disconnectJack(Station* station){
-    protocolSend(station->sockfd, 'Q', station->name);
+    protocolSend(station->jacksockfd, 'Q', station->name);
     print(DISCONNECT_JACK);
+}
+
+void disconnectWendy(Station* station){
+    protocolSend(station->wendysockfd, 'Q', station->name);
+    print(DISCONNECT_WENDY);
 }

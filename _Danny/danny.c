@@ -24,7 +24,7 @@ int main(int argc, char const *argv[]){
     Data data;
     Station station;
     time_t timeout;
-    struct pollfd pfd;
+    struct pollfd *pfds;
 
     print(STARTING);
 
@@ -44,22 +44,38 @@ int main(int argc, char const *argv[]){
 
     //Connect to Jack
     station.name = data.station;
-    station.sockfd = connectToJack(&data, station);
-    if(station.sockfd < 0){
+    station.jacksockfd = connectToServer(&data, station, 1);
+    if(station.jacksockfd < 0){
         freeConfig(&data);
         exit(EXIT_FAILURE);
     }
+    print(CONNECTED_JACK);
+
+    //Connect to Wendy
+    station.wendysockfd = connectToServer(&data, station, 0);
+    if(station.wendysockfd < 0){
+        freeConfig(&data);
+        disconnectJack(&station);
+        close(station.jacksockfd);
+        exit(EXIT_FAILURE);
+    }
+    print(CONNECTED_WENDY);
 
     //Scan directory
-    pfd.fd = station.sockfd;
-    pfd.events = POLLIN | POLLHUP;
+    pfds = (struct pollfd *) malloc(2 * sizeof(struct pollfd));
+
+    pfds[0].fd = station.jacksockfd;
+    pfds[0].events = POLLIN | POLLHUP;
+    pfds[0].fd = station.wendysockfd;
+    pfds[0].events = POLLIN | POLLHUP;
     while (!finish){
-        if (scanDirectory(&data, station.sockfd) < 0) break;
+        if (scanDirectory(&data, station) < 0) break;
 
         timeout = time(NULL);
         while (time(NULL) - timeout <= data.time && !finish){
-            if (poll(&pfd, 1, 0) >= 0){
-                if ((pfd.revents & POLLIN) || (pfd.revents & POLLHUP)){
+            if (poll(pfds, 2, 0) >= 0){
+                if ((pfds[0].revents & POLLIN) || (pfds[0].revents & POLLHUP) || 
+                ((pfds[1].revents & POLLIN) || (pfds[1].revents & POLLHUP))){
                     finish = 1;
                     break;
                 }
@@ -67,7 +83,11 @@ int main(int argc, char const *argv[]){
         }
     }
     
-    if (finish) disconnectJack(&station);
+    if (finish) {
+        disconnectJack(&station);
+
+    }
+
 
     freeConfig(&data);
     print(DISCONNECT_DANNY);
