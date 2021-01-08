@@ -12,10 +12,6 @@
 #include "libraries.h"
 #include "functions.h"
 #include "jackManager.h"
-<<<<<<< Updated upstream:_Jack/lloydManager.h
-=======
-#include "protocolManager.h"
->>>>>>> Stashed changes:_Lloyd/lloydManager.h
 
 //DEFINES
 #define EOL "\n"
@@ -29,26 +25,17 @@
 #define ERROR_FILE "Error opening file"
 
 #define LLOYD_PROMPT "$Lloyd:\n"
-<<<<<<< Updated upstream:_Jack/lloydManager.h
 #define SEM_WAITING "Waiting...\n"
-=======
-#define SEM_WAITING "Waiting for semaphore...\n"
->>>>>>> Stashed changes:_Lloyd/lloydManager.h
 #define RECEIVING_DATA "Receiving data...\n"
 #define PROCESSED_DATA "Data processed correctly!\n"
 #define LLOYD_FILE_REWRITE "Rewriting Hallorann.txt\n"
+#define STATION_STATISTICS "%s\n\tTemperature: %f\n\tHumidity: %f%%\n\tPressure: %f\n\tPrecipitation: %f\n\n"
 
-<<<<<<< Updated upstream:_Jack/lloydManager.h
 
 #define REWRITE_TIME 20
-=======
-#define HALLORANN_PATH "Hallorann.txt"
-
-#define REWRITE_TIME 10
->>>>>>> Stashed changes:_Lloyd/lloydManager.h
 
 typedef struct StationStatistics{
-    char nameString[STATION_NAME_LENGTH];
+    char* nameString;
     int readings;
     float temperature;
     float humidity;
@@ -56,12 +43,7 @@ typedef struct StationStatistics{
     float precipitation;
 } StationStatistics;
 
-typedef struct LloydStruct{
-    StationStatistics* stations;
-    int numStations;
-} LloydStruct;
 
-<<<<<<< Updated upstream:_Jack/lloydManager.h
 //FUNCTIONS
 /**
  * This will create the shared memory address and
@@ -78,9 +60,6 @@ StationDataShared* initMemory();
  * @return: int value for new client socket for error control
  */
 int jackCommunication(StationDataShared* shared, StationStatistics* stations, semaphore* sem_dataReady, semaphore* sem_dataProcessed, int* numStations);
-=======
-
->>>>>>> Stashed changes:_Lloyd/lloydManager.h
 
 /**
  * This function will read station data in the shared memory
@@ -96,14 +75,13 @@ int readFromMemory(StationDataShared* shared, StationStatistics* stations, int* 
  * @param: station pointer to array of data to write
  * @return: int value for error control
  */
-void writeToFile(StationStatistics** stations, const char* file, int numStations);
+void writeToFile(StationStatistics* stations, const char* file);
 
 /**
- * This function will print the statistics of a given station
- * @param: station pointer to struct of data to print
- * @return: print
+ * This function will free the shared memory with Jack
+ * @param: station pointer to shared memory
+ * @return: int value for error control
  */
-<<<<<<< Updated upstream:_Jack/lloydManager.h
 void freeSharedMemory(StationDataShared* shared);
 
 /**
@@ -112,9 +90,5 @@ void freeSharedMemory(StationDataShared* shared);
  * @return:
  */
 void* lloyd();
-=======
-void showStationStatistics(StationStatistics* station);
-
->>>>>>> Stashed changes:_Lloyd/lloydManager.h
 
 #endif
