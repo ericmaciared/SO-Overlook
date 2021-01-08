@@ -50,7 +50,11 @@ typedef struct StationData{
 } StationData;
 
 typedef struct StationDataShared{
+<<<<<<< Updated upstream
+    char* nameString;
+=======
     char nameString[STATION_NAME_LENGTH];
+>>>>>>> Stashed changes
     float temperature;
     float humidity;
     float pressure;
