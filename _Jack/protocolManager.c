@@ -7,10 +7,6 @@
 //INCLUDES
 #include "protocolManager.h"
 
-//PRIVATE FUNCTIONS
-
-
-
 //Connection frame checking
 int checkFrame(char* frame, char type, char* out){
     Frame newFrame;
