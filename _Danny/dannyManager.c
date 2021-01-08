@@ -70,6 +70,23 @@ void freeDataStation(StationData* data){
     free(data->precipitationString);
 }
 
+int getFileSize(char* address){
+    int fd = -1;
+    int count = 0;
+    char aux;
+
+    if ((fd = open(address, O_RDONLY)) < 0) {
+        print("Error opening file\n");
+        return 0;
+    }
+    else{
+        while ((read(fd, &aux, 1)) > 0) count++;  
+        close(fd);
+    }
+
+    return count;
+}
+
 int sendJackData(StationData* station, int fdSocket){
     //Parse station information to string
     char buffer[100];
@@ -78,6 +95,78 @@ int sendJackData(StationData* station, int fdSocket){
     stationToString(station, buffer);
 
     return protocolSend(fdSocket, 'D', buffer);
+}
+
+int sendWendyData(char* address, char* file, int fdSocket){
+    char data[100];
+
+    pid_t pid;
+    int link[2];
+    char* md5sum;
+
+    char location[128];
+    int size = 0;
+    int framesToSend = -1;
+    int imagefd = -1;
+
+    //Get MD5SUM from file
+    sprintf(location, ".%s/%s", address, file);
+
+    if (pipe(link) < 0) return -1;
+    if ((pid = fork()) < 0) return -1;
+
+    if (pid == 0){
+        char *args[] = {
+            "md5sum",
+            location,
+            NULL
+        };
+        dup2(link[1], 1);
+        execvp(args[0], args);
+    }
+    else{
+        md5sum = readUntil(link[0], ' ');
+        wait(NULL);
+    }
+
+    close(link[0]);
+    close(link[1]);
+    
+    //Get file size
+    size = getFileSize(location);
+    framesToSend = size/99 + 1;
+
+    printf("File size is: %d, packets to send: %d\n", size, framesToSend);
+
+    //Send 'I' frame
+    sprintf(data, "%s#%d#%s", file, size, md5sum);
+    protocolSend(fdSocket, 'I', data);
+
+    //Send 'F' frames
+    //Open image
+    imagefd = open(location, O_RDONLY);
+    
+    printf("Opened image -%s- with fd -%d-\n", location, imagefd);
+    while (framesToSend != 0){
+        //Get 99bytes to send
+        bzero(data, 0);
+        read(imagefd, data, 99);
+        data[99] = 0;
+
+        printf("Sending -%d/%d- -%s-\n", framesToSend, size/99 + 1, data);
+        //Make frame and send it to Wendy
+        protocolSend(fdSocket, 'F', data);
+        framesToSend--;
+    }
+    close(imagefd);
+    framesToSend = -1;
+
+    //Wait for response
+
+    //Free remaining dynamic data
+    free(md5sum);
+
+    return 0;
 }
 
 
@@ -129,10 +218,8 @@ void freeConfig(Data* data){
     data->wendy.ip = NULL;
 }
 
-int connectToJack(Data* data, Station station){
+int connectToServer(Data* data, Station station, int serverId){
     int sockfd = -1;
-
-    print(CONNECTING_JACK);
 
     //Create socket
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -145,9 +232,18 @@ int connectToJack(Data* data, Station station){
 
     memset(&s_addr, 0, sizeof(s_addr));
     s_addr.sin_family = AF_INET;
-    s_addr.sin_port = htons(data->jack.port);
-    s_addr.sin_addr.s_addr = inet_addr(data->jack.ip);
 
+    if (serverId){
+        print(CONNECTING_JACK);
+        s_addr.sin_port = htons(data->jack.port);
+        s_addr.sin_addr.s_addr = inet_addr(data->jack.ip);
+    }
+    else{
+        print(CONNECTING_WENDY);
+        s_addr.sin_port = htons(data->wendy.port);
+        s_addr.sin_addr.s_addr = inet_addr(data->wendy.ip);
+    }
+    
     //Connect to socket
     if (connect(sockfd, (void *) &s_addr, sizeof(s_addr)) < 0){
         print(ERROR_CONNECT);
@@ -160,11 +256,10 @@ int connectToJack(Data* data, Station station){
         return -1;
     }
     
-    print(CONNECTED_JACK);
     return sockfd;
 }
 
-int scanDirectory(Data* data, int fdSocket){
+int scanDirectory(Data* data, Station danny){
     DIR* d;
     char buffer[32];
     struct dirent* dir = NULL;
@@ -175,7 +270,7 @@ int scanDirectory(Data* data, int fdSocket){
     files = (char**) malloc(sizeof(char*));
 
     //check for new files
-    sprintf(buffer, DANNY_PROMPT, data->station);
+    sprintf(buffer, PROMPT, data->station);
     print(buffer);
     print(TESTING);
 
@@ -215,16 +310,26 @@ int scanDirectory(Data* data, int fdSocket){
                         //remove(buffer);
 
                         //Send to Jack
-                        if (sendJackData(&station, fdSocket) < 0){
-                            print("ERROR sending data to jack\n");
+                        if (sendJackData(&station, danny.jacksockfd) < 0){
+                            print("ERROR sending data to Jack.\n");
                         }
 
                         freeDataStation(&station);
                         break;
 
                     case JPG:
-                        //Send to Wendy
+                        print(SENDING_DATA);
+                        print(EOL);
+                        print(files[i]);
+                        print(EOL);
 
+                        //remove(buffer);
+
+                        //Send to Wendy
+                        if (sendWendyData(data->path, files[i], danny.wendysockfd) < 0){
+                            print("ERROR sending data to Wendy.\n");
+                        }
+                        else print(DATA_SENT);
                         break;
 
                     default:
@@ -245,6 +350,11 @@ int scanDirectory(Data* data, int fdSocket){
 }
 
 void disconnectJack(Station* station){
-    protocolSend(station->sockfd, 'Q', station->name);
+    protocolSend(station->jacksockfd, 'Q', station->name);
     print(DISCONNECT_JACK);
+}
+
+void disconnectWendy(Station* station){
+    protocolSend(station->wendysockfd, 'Q', station->name);
+    print(DISCONNECT_WENDY);
 }

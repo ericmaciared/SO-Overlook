@@ -65,7 +65,8 @@ int checkFrame(char* frame, char type, char* out){
     }
 
     strcpy(out, newFrame.data);
-    if (strcmp(newFrame.source, JACK) != 0) return -1;
+    if ((strcmp(newFrame.source, JACK) != 0) 
+    && (strcmp(newFrame.source, WENDY) != 0)) return -1;
     if (newFrame.type != type) return -1;
 
     return 1;
@@ -76,8 +77,11 @@ int checkFrame(char* frame, char type, char* out){
 int protocolConnection(int sockfd, char* name){
     //Connection Request
     Frame frame;
-    char buffer[116];
+    char buffer[116];    
     char aux[116];
+
+    bzero(buffer, 0);
+    bzero(aux, 0);
 
     frame = makeFrame('C', name);
 
@@ -115,19 +119,26 @@ int protocolSend(int sockfd, char type, char* data){
     char aux[116];
     bzero(buffer, 0);
 
+    //Make frame
     frame = makeFrame(type, data);
 
+    //Serialize frame
     frameToString(frame, buffer);
     buffer[115] = '\0';
     
-    printf("Sending: -%s- from %d\n", buffer, sockfd);
+    //Send frame
+    //printf("Sending: -%s- from %d\n", buffer, sockfd);
     if(write(sockfd, buffer, 115) != 115) return -1;
     bzero(buffer, 116);
     
+    //Get reply for data transmissions
     if(type == 'D'){
         read(sockfd, buffer, 115);
         if (checkFrame(buffer, 'B', aux) > 0) return 0;
     }
+
+    //No reply for image transmissions
+    if (type == 'F' || type == 'I') return 0;
 
     return -1;
 }

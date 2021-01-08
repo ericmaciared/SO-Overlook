@@ -1,3 +1,4 @@
+
 /**
  * Authors: Eric Macià Redondo (eric.macia)
  *          Guillermo Sabaté Castells (guillermo.sabate)
@@ -23,37 +24,31 @@
 #define ERROR_THREAD "Error creating new thread\n\n"
 
 #define DANNY "DANNY"
-#define JACK "JACK"
 #define WENDY "WENDY"
 #define ERROR "ERROR"
 #define OK "CONNEXIO OK"
+#define IMGOK "IMATGE OK"
+#define IMGKO "IMATGE KO"
+#define ERROR_TRAMA "ERROR DE TRAMA"
+
 
 //STRUCTS
+
 typedef struct{
   char source[14];
   char type;
   char data[100];
 } Frame;
 
-typedef struct StationData{
-  char* dateString;
-  char* hourString;
-  char* temperatureString;
-  char* humidityString;
-  char* pressureString;
-  char* precipitationString;
-}StationData;
-
 //FUNCTIONS
 
-/**
- *
- *
- */
-int protocolConnection(int sockfd, char* name);
 
-void stationToString(StationData* station, char* out);
+int protocolConnection(int sockfdclient, char* out);
 
-int protocolSend(int sockfd, char type, char* data);
+
+char protocolRead(int sockfdclient, char* out);
+
+
+void protocolResponse(int sockfdclient, char type, char* response);
 
 #endif
