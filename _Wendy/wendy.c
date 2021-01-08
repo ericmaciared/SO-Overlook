@@ -70,8 +70,14 @@ static void* handleDanny(void* args){
                 //printf("Can't open image. -%d-\n", errno);
             }
 
-            //printf("Writing -%d/%d- -%s-\n", framesToProcess, imageSize/99 + 1, buffer);
-            write(imagefd, buffer, 99);
+            printf("Writing -%d/%d-\n", framesToProcess, imageSize/99 + 1);
+
+            /*for (size_t i = 0; i < strlen(buffer); i++)
+            {
+                printf("-%d-", buffer[i]);
+            }
+            printf(EOL);*/
+            write(imagefd, buffer, strlen(buffer) - 1);
             close(imagefd);
 
             framesToProcess--;
@@ -82,8 +88,11 @@ static void* handleDanny(void* args){
                 
                 //Check md5sum
                 sprintf(buffer, "./Barry/%s", imageName);
-                if(checkMD5SUM(md5sum, buffer) != 0){
+                if(checkMD5SUM(md5sum, buffer) == 0){
                     //Send Reply
+
+                    print("Data is correct\n");
+
                     replyToDanny(client, 'S');
 
                 }
@@ -92,8 +101,8 @@ static void* handleDanny(void* args){
                     replyToDanny(client, 'R');
 
                     //delete file
-                    //printf("Removing  -%s-\n", buffer);
-                    remove(imageLocation);
+                    printf("Removing  -%s-\n", buffer);
+                    //remove(imageLocation);
                 }
                 
                 //Reset variables

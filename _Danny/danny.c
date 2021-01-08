@@ -66,8 +66,8 @@ int main(int argc, char const *argv[]){
 
     pfds[0].fd = station.jacksockfd;
     pfds[0].events = POLLIN | POLLHUP;
-    pfds[0].fd = station.wendysockfd;
-    pfds[0].events = POLLIN | POLLHUP;
+    pfds[1].fd = station.wendysockfd;
+    pfds[1].events = POLLIN | POLLHUP;
     while (!finish){
         if (scanDirectory(&data, station) < 0) break;
 
