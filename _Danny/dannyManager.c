@@ -153,7 +153,14 @@ int sendWendyData(char* address, char* file, int fdSocket){
         read(imagefd, data, 99);
         data[99] = 0;
 
-        printf("Sending -%d/%d- -%s-\n", framesToSend, size/99 + 1, data);
+        printf("Sending -%d/%d-\n", framesToSend, size/99 + 1);
+
+        /*for (size_t i = 0; i < strlen(data); i++)
+        {
+            printf("-%d-", data[i]);
+        }
+        printf(EOL);*/
+        
         //Make frame and send it to Wendy
         protocolSend(fdSocket, 'F', data);
         framesToSend--;

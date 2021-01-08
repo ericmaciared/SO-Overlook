@@ -119,6 +119,8 @@ int protocolSend(int sockfd, char type, char* data){
     char aux[116];
     bzero(buffer, 0);
 
+    struct pollfd pfd;
+
     //Make frame
     frame = makeFrame(type, data);
 
@@ -128,6 +130,17 @@ int protocolSend(int sockfd, char type, char* data){
     
     //Send frame
     //printf("Sending: -%s- from %d\n", buffer, sockfd);
+    pfd.fd = sockfd;
+    pfd.events = POLLOUT;
+
+    while (1){
+            if (poll(&pfd, 1, 0) >= 0){
+                if (pfd.revents & POLLOUT){
+                    break;
+                }
+            }
+        }
+
     if(write(sockfd, buffer, 115) != 115) return -1;
     bzero(buffer, 116);
     
