@@ -86,22 +86,24 @@ int acceptConnection(int sockfdServer, Station* client){
     return 0;
 }
 
-char readFromDanny(Station* client){
-    char type = protocolRead(client->sockfd);
+char readFromDanny(Station* client, char* out){
+    char buffer[128];
+    char type = protocolRead(client->sockfd, buffer);
 
     //Read frame
     switch(type){
         //New image
         case 'I':
             print(RECEIVING_DATA);
-
-            
+            strcpy(out, buffer);
             break;
 
         //Data from image
         case 'F':
-            print("Receiving info...\n");
-
+            /*print("Receiving image info...\n");
+            print(buffer);
+            print(EOL);*/
+            strcpy(out, buffer);
             break;
 
         //Disconnection
@@ -111,7 +113,7 @@ char readFromDanny(Station* client){
 
         //Wrong frame
         default:
-            replyToDanny(client, 'Z');
+            //replyToDanny(client, 'Z');
             return 'Z';
     }
 
@@ -133,4 +135,66 @@ int replyToDanny(Station* client, char type){
             break;
     }
     return 0;
+}
+
+int dataToImageData(char* in, char* imageName, char* md5sum){
+    int i = 0;
+    int j = 0;
+    char aux[32];
+
+    while (in[i] != '#'){
+        imageName[j++] = in[i++];
+
+    }
+    imageName[j] = '\0';
+    i++; 
+    j=0;
+
+
+    while (in[i] != '#'){
+        aux[j++] = in[i++];
+    }
+    aux[j] = '\0';
+    i++; 
+    j=0;
+    
+    while (in[i] != '\0'){
+        md5sum[j++] = in[i++];
+    }
+    md5sum[j] = '\0';
+    i++; 
+    j=0;
+
+    return atoi(aux);
+}
+
+int checkMD5SUM(char* origin, char* current){
+    pid_t pid;
+    int link[2];
+    char* md5sum;
+
+    //Get MD5SUM from file
+    if (pipe(link) < 0) return -1;
+    if ((pid = fork()) < 0) return -1;
+
+    if (pid == 0){
+        char *args[] = {
+            "md5sum",
+            current,
+            NULL
+        };
+        dup2(link[1], 1);
+        execvp(args[0], args);
+    }
+    else{
+        md5sum = readUntil(link[0], ' ');
+        wait(NULL);
+    }
+
+    close(link[0]);
+    close(link[1]);
+
+    printf("Comparing -%s- to -%s-\n", origin, md5sum);
+    
+    return strcmp(origin, md5sum);
 }

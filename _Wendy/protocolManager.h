@@ -46,7 +46,7 @@ typedef struct{
 int protocolConnection(int sockfdclient, char* out);
 
 
-char protocolRead(int sockfdclient);
+char protocolRead(int sockfdclient, char* out);
 
 
 void protocolResponse(int sockfdclient, char type, char* response);

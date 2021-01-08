@@ -114,8 +114,6 @@ void stationToString(StationData* station, char* out){
 }
 
 int protocolSend(int sockfd, char type, char* data){
-    
-    
     Frame frame;
     char buffer[116];
     char aux[116];
@@ -129,7 +127,7 @@ int protocolSend(int sockfd, char type, char* data){
     buffer[115] = '\0';
     
     //Send frame
-    printf("Sending: -%s- from %d\n", buffer, sockfd);
+    //printf("Sending: -%s- from %d\n", buffer, sockfd);
     if(write(sockfd, buffer, 115) != 115) return -1;
     bzero(buffer, 116);
     

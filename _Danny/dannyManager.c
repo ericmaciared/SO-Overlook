@@ -70,6 +70,23 @@ void freeDataStation(StationData* data){
     free(data->precipitationString);
 }
 
+int getFileSize(char* address){
+    int fd = -1;
+    int count = 0;
+    char aux;
+
+    if ((fd = open(address, O_RDONLY)) < 0) {
+        print("Error opening file\n");
+        return 0;
+    }
+    else{
+        while ((read(fd, &aux, 1)) > 0) count++;  
+        close(fd);
+    }
+
+    return count;
+}
+
 int sendJackData(StationData* station, int fdSocket){
     //Parse station information to string
     char buffer[100];
@@ -81,15 +98,19 @@ int sendJackData(StationData* station, int fdSocket){
 }
 
 int sendWendyData(char* address, char* file, int fdSocket){
+    char data[100];
+
     pid_t pid;
     int link[2];
-    char* buffer;
-    char location[128];
+    char* md5sum;
 
-    sprintf(location, ".%s/%s", address, file);
+    char location[128];
+    int size = 0;
+    int framesToSend = -1;
+    int imagefd = -1;
 
     //Get MD5SUM from file
-    printf("Getting MD5SUM from %s\n", location);
+    sprintf(location, ".%s/%s", address, file);
 
     if (pipe(link) < 0) return -1;
     if ((pid = fork()) < 0) return -1;
@@ -102,24 +123,48 @@ int sendWendyData(char* address, char* file, int fdSocket){
         };
         dup2(link[1], 1);
         execvp(args[0], args);
-        //execlp(location, location, "md5sum", file, NULL);
     }
     else{
-        buffer = readUntil(link[0], ' ');
+        md5sum = readUntil(link[0], ' ');
         wait(NULL);
-        printf("Output: -%s-\n", buffer);
     }
 
     close(link[0]);
     close(link[1]);
     
-    
+    //Get file size
+    size = getFileSize(location);
+    framesToSend = size/99 + 1;
+
+    printf("File size is: %d, packets to send: %d\n", size, framesToSend);
 
     //Send 'I' frame
+    sprintf(data, "%s#%d#%s", file, size, md5sum);
+    protocolSend(fdSocket, 'I', data);
 
     //Send 'F' frames
+    //Open image
+    imagefd = open(location, O_RDONLY);
+    
+    printf("Opened image -%s- with fd -%d-\n", location, imagefd);
+    while (framesToSend != 0){
+        //Get 99bytes to send
+        bzero(data, 0);
+        read(imagefd, data, 99);
+        data[99] = 0;
+
+        printf("Sending -%d/%d- -%s-\n", framesToSend, size/99 + 1, data);
+        //Make frame and send it to Wendy
+        protocolSend(fdSocket, 'F', data);
+        framesToSend--;
+    }
+    close(imagefd);
+    framesToSend = -1;
 
     //Wait for response
+
+    //Free remaining dynamic data
+    free(md5sum);
 
     return 0;
 }

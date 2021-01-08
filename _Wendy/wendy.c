@@ -23,10 +23,21 @@ void ksighandler(){
 
 static void* handleDanny(void* args){
     Station* client = (Station *) args;
-    char buffer[64];
+    char buffer[128];
     char type = 0;
     struct pollfd pfd;
-    
+
+    char* imageName = NULL;
+    char imageLocation[128];
+    int imageSize = 0;
+    char* md5sum = NULL;
+    int framesToProcess = -1;
+
+    int imagefd = -1;
+
+    imageName = (char*) malloc(31 * sizeof(char));
+    md5sum = (char *) malloc(33 * sizeof(char));
+
     pfd.fd = client->sockfd;
     pfd.events = POLLIN;
 
@@ -35,29 +46,73 @@ static void* handleDanny(void* args){
         while (!terminate){
             if (poll(&pfd, 1, 0) >= 0){
                 if (pfd.revents & POLLIN){
-                    type = readFromDanny(client);
+                    type = readFromDanny(client, buffer);
                     break;
                 }
             }
         }
         
-        //TODO: if new image prepare for new image
+        //if new image prepare for new image
         if (type == 'I'){
-            /* code */
+            imageSize = dataToImageData(buffer, imageName, md5sum);
+            framesToProcess = imageSize/99 + 1;
+
+            //Create image if not existent at barry directory
+            sprintf(imageLocation, "./Barry/%s", imageName);
+            imagefd = open(imageLocation, O_WRONLY | O_CREAT, 0777);
+            close(imagefd);
         }
         
         //TODO: If image info fill image info
         if (type == 'F'){
-            /* code */
+            //Open image in append mode
+            if((imagefd = open(imageLocation, O_WRONLY | O_APPEND)) < 0){
+                //printf("Can't open image. -%d-\n", errno);
+            }
+
+            //printf("Writing -%d/%d- -%s-\n", framesToProcess, imageSize/99 + 1, buffer);
+            write(imagefd, buffer, 99);
+            close(imagefd);
+
+            framesToProcess--;
+            
+            //If finished transmission send reply and post image in Barry
+            if (framesToProcess == 0){
+                //print("Receiving image data and checking data integrity\n");
+                
+                //Check md5sum
+                sprintf(buffer, "./Barry/%s", imageName);
+                if(checkMD5SUM(md5sum, buffer) != 0){
+                    //Send Reply
+                    replyToDanny(client, 'S');
+
+                }
+                else {
+                    //Send Reply
+                    replyToDanny(client, 'R');
+
+                    //delete file
+                    //printf("Removing  -%s-\n", buffer);
+                    remove(imageLocation);
+                }
+                
+                //Reset variables
+
+                framesToProcess = -1;
+                imageSize = 0;
+                bzero(imageLocation, 0);
+                bzero(imageName, 0);
+                bzero(md5sum, 0);
+            }
+            
         }
-
-        //TODO: If finished transmission send reply and post image in Barry
-
-
         
         //If disconnection from danny 
         if (type == 'Q') break;
     }
+
+    free(imageName);
+    free(md5sum);
 
     sprintf(buffer, "Closing %s station.\n", client->name);
     print(buffer);

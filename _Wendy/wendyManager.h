@@ -74,9 +74,10 @@ int acceptConnection(int sockfdServer, Station* client);
  * process the data read and return a value corresponding
  * to the response type that is required to reply with.
  * @param: station pointer to struct with name and socket fd
+ *         pointer to string to fill with received data
  * @return: char value for new response from server
  */
-char readFromDanny(Station* client);
+char readFromDanny(Station* client, char* out);
 
 /**
  * This function will reply the Danny client with the message
@@ -86,6 +87,10 @@ char readFromDanny(Station* client);
  * @return: int value set to 1 if need to terminate, else 0
  */
 int replyToDanny(Station* client, char responseType);
+
+int dataToImageData(char* in, char* imageName, char* md5sum);
+
+int checkMD5SUM(char* origin, char* current);
 
 
 #endif

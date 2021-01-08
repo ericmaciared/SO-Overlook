@@ -112,7 +112,7 @@ int protocolConnection(int sockfdclient, char* out){
     }
 }
 
-char protocolRead(int sockfdclient){
+char protocolRead(int sockfdclient, char* out){
     char buffer[116];
     char aux[116];
     bzero(buffer, 0);
@@ -122,21 +122,23 @@ char protocolRead(int sockfdclient){
     read(sockfdclient, buffer, 115);
     buffer[115] = 0;
 
-    print("Received: ");
+    /*print("Received: ");
 
     for (int i = 0; i < 115; i++){
         sprintf(aux, "-%c-", buffer[i]);
         print(aux);
-    }
+    }*/
 
     //Check if new image
     if (checkFrame(buffer, 'I', aux) > 0){
-        
+        strcpy(out, aux);
+        return 'I';
     }
 
     //Check if image data
     if (checkFrame(buffer, 'F', aux) > 0){
-        /* code */
+        strcpy(out, aux);
+        return 'F';
     }
     
     //Check if disconnection frame

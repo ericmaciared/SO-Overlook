@@ -27,3 +27,4 @@ char* readUntil(int fd, char delimiter) {
     string[i] = '\0';
     return string;
 }
+
