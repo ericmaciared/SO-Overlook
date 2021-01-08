@@ -26,10 +26,12 @@
 #define JACK_PROMPT "\n$Jack:\n"
 #define STARTING "\nStarting Jack...\n"
 #define DISCONNECTING "\nDisconnecting Jack...\n\n"
+#define DISCONNECTING_LLOYD "\nDisconnecting Lloyd...\n\n"
 #define BYEDANNY "Disconnecting Danny (%s)\n\n"
 #define CONNECTION_WAITING "Waiting...\n"
 #define NEW_CONNECTION "New connection: %s\n"
 #define RECEIVING_DATA "Receiving data...\n"
+#define STATION_STATISTICS "%s\n\tTemperature: %.2f\n\tHumidity: %.2f%%\n\tPressure: %.2f\n\tPrecipitation: %.2f\n\n"
 
 
 //STRUCTS
@@ -87,5 +89,49 @@ char readFromDanny(Station* client);
  */
 int replyToDanny(Station* client, char responseType);
 
+/**
+ * This function will convert to output a StationDataShared
+ * @param: StationData pointer to data struct
+ *         char pointer with station name
+ * @return: StationDataShared filled with the converted information
+ */
+StationDataShared convertToStationShared(StationData* station, char* name);
+
+/**
+ * This function will print the data of a station
+ * @param: StationData* to data
+ * @return: print
+ */
+void showStationData(StationData* station);
+
+/**
+ * This function will print the data of a station shared
+ * @param: StationData* to data
+ * @return: print
+ */
+void showStationSharedData(StationDataShared* station);
+
+/**
+ * This function will free the data of a station and its shared conversion
+ * @param: StationData* to data
+ *         StationDataShared* to converted data
+ * @return:
+ */
+void freeStationData(StationData* data);
+
+/**
+ * This function will convert to output a StationDataShared
+ * @param: StationData pointer to data struct
+ *         char pointer with station name
+ * @return: StationDataShared filled with the converted information
+ */
+void writeToSharedMemory(StationDataShared* shared, StationDataShared* new);
+
+/**
+ * This function will free the shared memory with Jack
+ * @param: station pointer to shared memory
+ * @return: int value for error control
+ */
+void freeSharedMemory(StationDataShared* shared);
 
 #endif

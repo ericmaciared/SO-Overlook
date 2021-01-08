@@ -8,6 +8,9 @@
 #include "protocolManager.h"
 
 //PRIVATE FUNCTIONS
+
+
+
 //Connection frame checking
 int checkFrame(char* frame, char type, char* out){
     Frame newFrame;
@@ -190,7 +193,7 @@ int protocolConnection(int sockfdclient, char* out){
         sprintf(aux, "-%c-", buffer[i]);
         print(aux);
     }*/
-    
+
 
     if (checkFrame(buffer, 'C', out) > 0){
         bzero(buffer, 115);
