@@ -7,31 +7,6 @@
 //INCLUDES
 #include "jackManager.h"
 
-//PRIVATE FUNCTIONS
-void showStationData(StationData* station){
-    print(station->dateString);
-    print(EOL);
-    print(station->hourString);
-    print(EOL);
-    print(station->temperatureString);
-    print(EOL);
-    print(station->humidityString);
-    print(EOL);
-    print(station->pressureString);
-    print(EOL);
-    print(station->precipitationString);
-    print(EOL);
-}
-
-void freeStationData(StationData* data){
-    free(data->dateString);
-    free(data->hourString);
-    free(data->temperatureString);
-    free(data->humidityString);
-    free(data->pressureString);
-    free(data->precipitationString);
-}
-
 //PUBLIC FUNCTIONS
 int processConfig(Config* config, const char* file){
     int fd = -1;
@@ -110,38 +85,6 @@ int acceptConnection(int sockfdServer, Station* client){
     return 0;
 }
 
-char readFromDanny(Station* client){
-    StationData sd;
-    char type = protocolRead(client->sockfd, &sd);
-
-    //Read frame
-    switch(type){
-        case 'D':
-            print(JACK_PROMPT);
-            print(RECEIVING_DATA);
-            //Send data Lloyd
-            //Print to screen
-            showStationData(&sd);
-
-            //Frees of dynamic memory
-            freeStationData(&sd);
-            break;
-
-        case 'K':
-            //Erroneous frame
-            print("Erroneous Frame\n");
-
-            //sendtodanny('K')
-            break;
-
-        default:
-            //sendtodanny('Z')
-            break;
-    }
-
-    return type;
-}
-
 int replyToDanny(Station* client, char type){
     char buffer[64];
     switch(type){
@@ -178,4 +121,53 @@ int replyToDanny(Station* client, char type){
             return 1;
     }
     return -1;
+}
+
+//StationData related FUNCTIONS
+void showStationData(StationData* station){
+    print(station->dateString);
+    print(EOL);
+    print(station->hourString);
+    print(EOL);
+    print(station->temperatureString);
+    print(EOL);
+    print(station->humidityString);
+    print(EOL);
+    print(station->pressureString);
+    print(EOL);
+    print(station->precipitationString);
+    print(EOL);
+}
+
+void showStationSharedData(StationDataShared* station){
+    char buffer[256];
+    sprintf(buffer, STATION_STATISTICS, station->nameString, station->temperature, station->humidity, station->pressure, station->precipitation);
+    print(buffer);
+}
+
+void freeStationData(StationData* data){
+    free(data->dateString);
+    free(data->hourString);
+    free(data->temperatureString);
+    free(data->humidityString);
+    free(data->pressureString);
+    free(data->precipitationString);
+}
+
+StationDataShared convertToStationShared(StationData* station, char* name){
+    StationDataShared conversion;
+    strcpy(conversion.nameString, name);
+    conversion.temperature = atof(station->temperatureString);
+    conversion.humidity = atof(station->humidityString);
+    conversion.pressure = atof(station->pressureString);
+    conversion.precipitation = atof(station->precipitationString);
+    return conversion;
+}
+
+void writeToSharedMemory(StationDataShared* shared, StationDataShared* new){
+    strcpy(shared->nameString, new->nameString);
+    shared->temperature = new->temperature;
+    shared->humidity = new->humidity;
+    shared->pressure = new->pressure;
+    shared->precipitation = new->precipitation;
 }

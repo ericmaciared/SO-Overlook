@@ -190,7 +190,7 @@ int protocolConnection(int sockfdclient, char* out){
         sprintf(aux, "-%c-", buffer[i]);
         print(aux);
     }*/
-    
+
 
     if (checkFrame(buffer, 'C', out) > 0){
         bzero(buffer, 115);
@@ -225,12 +225,13 @@ char protocolRead(int sockfdclient, StationData* station){
     read(sockfdclient, buffer, 115);
     buffer[115] = 0;
 
+    /*
     print("Received: ");
-
     for (int i = 0; i < 115; i++){
         sprintf(aux, "-%c-", buffer[i]);
         print(aux);
     }
+    */
 
     //Check if atmospheric data
     if (checkFrame(buffer, 'D', aux) > 0){
