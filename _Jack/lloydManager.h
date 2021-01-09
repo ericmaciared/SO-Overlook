@@ -63,7 +63,7 @@ int readFromMemory(StationDataShared* shared, StationStatistics* stations, int* 
  * @param: station pointer to array of data to write
  * @return: int value for error control
  */
-void writeToFile(StationStatistics** stations, const char* file, int numStations);
+void writeToFile(StationStatistics* stations, const char* file, int numStations);
 
 /**
  * This function will print the statistics of a given station

@@ -49,10 +49,10 @@ int readFromMemory(StationDataShared* shared, StationStatistics* stations, int *
     return 1;
 }
 
-void writeToFile(StationStatistics** statistics, const char* file, int numStations){
+void writeToFile(StationStatistics* statistics, const char* file, int numStations){
     int fd = -1;
     char buffer[512];
-
+    int i;
     fd = open(file, O_WRONLY | O_CREAT);
 
     if (fd <= 0) {
@@ -61,13 +61,14 @@ void writeToFile(StationStatistics** statistics, const char* file, int numStatio
     else {
         if (statistics != NULL){
             print(LLOYD_FILE_REWRITE);
-            int i = 0;
-            for (i = 0; i < numStations ; i++){
-                sprintf(buffer, STATION_STATISTICS, statistics[i]->nameString, statistics[i]->temperature, statistics[i]->humidity, statistics[i]->pressure, statistics[i]->precipitation);
+
+            for (i = 0; i < numStations; i++){
+                sprintf(buffer, STATION_STATISTICS, statistics[i].nameString, statistics[i].temperature, statistics[i].humidity, statistics[i].pressure, statistics[i].precipitation);
                 print(buffer);
                 buffer[strlen(buffer)+1] = '\0';
-                write(fd, buffer, sizeof(buffer));
+                if (write(fd, buffer, strlen(buffer)) < 0) print("FTHIS");
             }
         }
+        close(fd);
     }
 }
