@@ -94,26 +94,27 @@ char readFromDanny(Station* client, char* out){
     switch(type){
         //New image
         case 'I':
-            print(RECEIVING_DATA);
-            strcpy(out, buffer);
+            for (size_t i = 0; i < 99; i++){
+                out[i] = buffer[i];
+            }
+            sprintf(buffer, RECEIVING_DATA, client->name);
+            print(buffer);
             break;
 
         //Data from image
         case 'F':
-            /*print("Receiving image info...\n");
-            print(buffer);
-            print(EOL);*/
-            strcpy(out, buffer);
+            for (int i = 0; i < 99; i++){
+                out[i] = buffer[i];
+            }
             break;
 
         //Disconnection
         case 'Q':
-            
             break;
 
         //Wrong frame
         default:
-            //replyToDanny(client, 'Z');
+            replyToDanny(client, 'Z');
             return 'Z';
     }
 
@@ -193,8 +194,6 @@ int checkMD5SUM(char* origin, char* current){
 
     close(link[0]);
     close(link[1]);
-
-    printf("Comparing -%s- to -%s-\n", origin, md5sum);
     
     return strcmp(origin, md5sum);
 }

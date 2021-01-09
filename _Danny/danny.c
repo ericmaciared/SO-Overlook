@@ -83,11 +83,12 @@ int main(int argc, char const *argv[]){
         }
     }
     
+    free(pfds);
+
     if (finish) {
         disconnectJack(&station);
-
+        disconnectWendy(&station);
     }
-
 
     freeConfig(&data);
     print(DISCONNECT_DANNY);

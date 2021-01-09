@@ -55,7 +55,7 @@ static void* handleDanny(void* args){
         //if new image prepare for new image
         if (type == 'I'){
             imageSize = dataToImageData(buffer, imageName, md5sum);
-            framesToProcess = imageSize/99 + 1;
+            framesToProcess = imageSize;
 
             //Create image if not existent at barry directory
             sprintf(imageLocation, "./Barry/%s", imageName);
@@ -67,42 +67,38 @@ static void* handleDanny(void* args){
         if (type == 'F'){
             //Open image in append mode
             if((imagefd = open(imageLocation, O_WRONLY | O_APPEND)) < 0){
-                //printf("Can't open image. -%d-\n", errno);
+                printf("Can't open image. -%d-\n", errno);
             }
 
-            printf("Writing -%d/%d-\n", framesToProcess, imageSize/99 + 1);
-
-            /*for (size_t i = 0; i < strlen(buffer); i++)
-            {
-                printf("-%d-", buffer[i]);
-            }
-            printf(EOL);*/
-            write(imagefd, buffer, strlen(buffer) - 1);
-            close(imagefd);
-
-            framesToProcess--;
+            if (framesToProcess < 99) write(imagefd, buffer, framesToProcess);
+            else write(imagefd, buffer, 99);
             
+            close(imagefd);
+            
+            //sprintf(bufferout, "Bytes remaining: -%d-\n", framesToProcess);
+            //write(1, bufferout, strlen(bufferout));
+            
+            framesToProcess-=99;
+
             //If finished transmission send reply and post image in Barry
-            if (framesToProcess == 0){
+            if (framesToProcess <= 0){
                 //print("Receiving image data and checking data integrity\n");
                 
                 //Check md5sum
                 sprintf(buffer, "./Barry/%s", imageName);
                 if(checkMD5SUM(md5sum, buffer) == 0){
                     //Send Reply
-
-                    print("Data is correct\n");
+                    print(imageName);
+                    print(EOL);
 
                     replyToDanny(client, 'S');
-
                 }
                 else {
                     //Send Reply
                     replyToDanny(client, 'R');
 
-                    //delete file
-                    printf("Removing  -%s-\n", buffer);
-                    //remove(imageLocation);
+                    //Delete file
+                    remove(imageLocation);
                 }
                 
                 //Reset variables
@@ -113,7 +109,6 @@ static void* handleDanny(void* args){
                 bzero(imageName, 0);
                 bzero(md5sum, 0);
             }
-            
         }
         
         //If disconnection from danny 
@@ -191,6 +186,8 @@ int main(int argc, char const *argv[]){
     for (int j = 0; j < i; j++){
         free(clients[j].name);
     }
+
+    print("All threads returned\n");
 
     return 0;
 }

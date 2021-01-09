@@ -26,16 +26,13 @@ int checkFrame(char* frame, char type, char* out){
 
     //Get data
     for (int i = 15; i < 115; i++){
-        if (frame[i] == '\0' || frame[i] == '$'){
-            newFrame.data[i-15] = '\0';
-            break;
-        }
-        else{
-            newFrame.data[i-15] = frame[i];
-        }
+        newFrame.data[i-15] = frame[i];
     }
 
-    strcpy(out, newFrame.data);
+    for (int i = 0; i < 99; i++){
+        out[i] = newFrame.data[i];
+    }
+
     if (strcmp(newFrame.source, DANNY) != 0) return -1;
     if (newFrame.type != type) return -1;
 
@@ -66,7 +63,9 @@ Frame makeFrame(char type, char* data){
     Frame frame;
     strcpy(frame.source, WENDY);
     frame.type = type;
-    strcpy(frame.data, data);
+    for (int i = 0; i < 99; i++){
+        frame.data[i] = data[i];
+    }
 
     return frame;
 }
@@ -76,18 +75,10 @@ Frame makeFrame(char type, char* data){
 int protocolConnection(int sockfdclient, char* out){
     Frame frame;
     char buffer[116];
-    char aux[128];
     bzero(buffer, 116);
 
     //Connection Request
     read(sockfdclient, &buffer, 115);
-
-    print("Received: ");
-
-    for (int i = 0; i < 115; i++){
-        sprintf(aux, "-%c-", buffer[i]);
-        print(aux);
-    }
     
     //Connection Response
     if (checkFrame(buffer, 'C', out) > 0){
@@ -122,13 +113,6 @@ char protocolRead(int sockfdclient, char* out){
     read(sockfdclient, buffer, 115);
     buffer[115] = 0;
 
-    /*print("Received: ");
-
-    for (int i = 0; i < 115; i++){
-        sprintf(aux, "-%c-", buffer[i]);
-        print(aux);
-    }*/
-
     //Check if new image
     if (checkFrame(buffer, 'I', aux) > 0){
         strcpy(out, aux);
@@ -137,7 +121,9 @@ char protocolRead(int sockfdclient, char* out){
 
     //Check if image data
     if (checkFrame(buffer, 'F', aux) > 0){
-        strcpy(out, aux);
+        for (int i = 0; i < 99; i++){
+            out[i] = aux[i];
+        }
         return 'F';
     }
     

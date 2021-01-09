@@ -15,25 +15,28 @@ void frameToString(Frame frame, char* final){
 
     for (i = 0; i < 14; i++){
         if (frame.source[i] == '\0') flag = 1;
-        if (flag) final[i] = '$';
+        if (flag) final[i] = '\0';
         else final[i] = frame.source[i];
     }
     
     final[14] = frame.type;
 
-    flag = 0;
     for (i = 15; i < 115; i++){
-        if (frame.data[i-15] == '\0') flag = 1;
-        if (flag) final[i] = '$';
-        else final[i] = frame.data[i-15];
+        final[i] = frame.data[i-15];
     }
+
+    final[115] = '\0';
 }
 
 Frame makeFrame(char type, char* data){
     Frame frame;
     strcpy(frame.source, DANNY);
+
     frame.type = type;
-    strcpy(frame.data, data);
+
+    for (int i = 0; i < 99; i++){
+        frame.data[i] = data[i];
+    }
 
     return frame;
 }
@@ -119,8 +122,6 @@ int protocolSend(int sockfd, char type, char* data){
     char aux[116];
     bzero(buffer, 0);
 
-    struct pollfd pfd;
-
     //Make frame
     frame = makeFrame(type, data);
 
@@ -129,18 +130,6 @@ int protocolSend(int sockfd, char type, char* data){
     buffer[115] = '\0';
     
     //Send frame
-    //printf("Sending: -%s- from %d\n", buffer, sockfd);
-    pfd.fd = sockfd;
-    pfd.events = POLLOUT;
-
-    while (1){
-            if (poll(&pfd, 1, 0) >= 0){
-                if (pfd.revents & POLLOUT){
-                    break;
-                }
-            }
-        }
-
     if(write(sockfd, buffer, 115) != 115) return -1;
     bzero(buffer, 116);
     
