@@ -30,12 +30,7 @@
 #include <sys/shm.h>
 #include <poll.h>
 
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
+
 #include "semaphore_v2.h"
 
-=======
->>>>>>> Stashed changes
 #endif

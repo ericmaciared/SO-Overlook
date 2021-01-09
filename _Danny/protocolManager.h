@@ -24,6 +24,7 @@
 
 #define DANNY "DANNY"
 #define JACK "JACK"
+#define WENDY "WENDY"
 #define ERROR "ERROR"
 #define OK "CONNEXIO OK"
 

@@ -30,6 +30,7 @@
 #define DATAKO "DADES KO"
 #define DATADEAD "DADES WENT VERY KO"
 
+#define STATION_NAME_LENGTH 100
 
 //STRUCTS
 
@@ -49,7 +50,7 @@ typedef struct StationData{
 } StationData;
 
 typedef struct StationDataShared{
-    char* nameString;
+    char nameString[STATION_NAME_LENGTH];
     float temperature;
     float humidity;
     float pressure;

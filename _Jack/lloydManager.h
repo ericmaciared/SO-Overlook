@@ -12,6 +12,7 @@
 #include "libraries.h"
 #include "functions.h"
 #include "jackManager.h"
+#include "protocolManager.h"
 
 //DEFINES
 #define EOL "\n"
@@ -25,17 +26,17 @@
 #define ERROR_FILE "Error opening file"
 
 #define LLOYD_PROMPT "$Lloyd:\n"
-#define SEM_WAITING "Waiting...\n"
+#define SEM_WAITING "Waiting for semaphore...\n"
 #define RECEIVING_DATA "Receiving data...\n"
 #define PROCESSED_DATA "Data processed correctly!\n"
-#define LLOYD_FILE_REWRITE "Rewriting Hallorann.txt\n"
-#define STATION_STATISTICS "%s\n\tTemperature: %f\n\tHumidity: %f%%\n\tPressure: %f\n\tPrecipitation: %f\n\n"
+#define LLOYD_FILE_REWRITE "\n$Lloyd:\nRewriting Hallorann.txt\n"
 
 
-#define REWRITE_TIME 20
+#define HALLORANN_PATH "Hallorann.txt"
+#define REWRITE_TIME 10
 
 typedef struct StationStatistics{
-    char* nameString;
+    char nameString[STATION_NAME_LENGTH];
     int readings;
     float temperature;
     float humidity;
@@ -43,23 +44,10 @@ typedef struct StationStatistics{
     float precipitation;
 } StationStatistics;
 
-
-//FUNCTIONS
-/**
- * This will create the shared memory address and
- * initialize the stations data array
- * @param:
- * @return: pointer of the shared memory address
- */
-StationDataShared* initMemory();
-
-/**
- * This function will be in charge of managing the communication
- * with Jack, waiting for signals, reading and sending them back
- * @param:
- * @return: int value for new client socket for error control
- */
-int jackCommunication(StationDataShared* shared, StationStatistics* stations, semaphore* sem_dataReady, semaphore* sem_dataProcessed, int* numStations);
+typedef struct LloydStruct{
+    StationStatistics* stations;
+    int numStations;
+} LloydStruct;
 
 /**
  * This function will read station data in the shared memory
@@ -75,20 +63,12 @@ int readFromMemory(StationDataShared* shared, StationStatistics* stations, int* 
  * @param: station pointer to array of data to write
  * @return: int value for error control
  */
-void writeToFile(StationStatistics* stations, const char* file);
+void writeToFile(StationStatistics** stations, const char* file, int numStations);
 
 /**
- * This function will free the shared memory with Jack
- * @param: station pointer to shared memory
- * @return: int value for error control
+ * This function will print the statistics of a given station
+ * @param: station pointer to struct of data to print
+ * @return: print
  */
-void freeSharedMemory(StationDataShared* shared);
-
-/**
- * This function will execute the Lloyd Procedure
- * @param:
- * @return:
- */
-void* lloyd();
-
+ void showStationStatistics(StationStatistics* station);
 #endif
