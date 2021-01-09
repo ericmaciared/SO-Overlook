@@ -55,20 +55,21 @@ void writeToFile(StationStatistics* statistics, const char* file, int numStation
     int i;
     fd = open(file, O_WRONLY | O_CREAT);
 
-    if (fd <= 0) {
-        perror(ERROR_FILE);
-    }
+    if (fd <= 0) perror(ERROR_FILE);
     else {
         if (statistics != NULL){
             print(LLOYD_FILE_REWRITE);
 
             for (i = 0; i < numStations; i++){
                 sprintf(buffer, STATION_STATISTICS, statistics[i].nameString, statistics[i].temperature, statistics[i].humidity, statistics[i].pressure, statistics[i].precipitation);
-                print(buffer);
+                //print(buffer);
                 buffer[strlen(buffer)+1] = '\0';
-                if (write(fd, buffer, strlen(buffer)) < 0) print("FTHIS");
+                if (write(fd, buffer, strlen(buffer)) < 0) print("Error in write");
             }
         }
         close(fd);
     }
 }
+
+
+

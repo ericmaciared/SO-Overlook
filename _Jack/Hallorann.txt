@@ -1,10 +1,8 @@
-
-	Temperature: 0.00
-	Humidity: 0.00%
-	Pressure: 0.00
-	Precipitation: 0.00
-
-ation: 3.00
+Igualada
+	Temperature: 23.50
+	Humidity: 72.00%
+	Pressure: 1007.70
+	Precipitation: 3.00
 
 Sant Celoni
 	Temperature: 23.50

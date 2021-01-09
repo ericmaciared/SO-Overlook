@@ -81,7 +81,7 @@ int protocolConnection(int sockfd, char* name){
     //Connection Request
     Frame frame;
     char buffer[116];    
-    char aux[116];
+    char aux[128];
 
     bzero(buffer, 0);
     bzero(aux, 0);
@@ -91,7 +91,9 @@ int protocolConnection(int sockfd, char* name){
     frameToString(frame, buffer);
     buffer[115] = '\0';
 
-    printf("Sending: -%s- from %d\n", buffer, sockfd);
+    //sprintf(aux, "Frame out: %s-%c-%s\n", frame.source, frame.type, frame.data);
+    //print(aux);
+
     write(sockfd, buffer, 115);
 
     //Connection Reply
@@ -119,7 +121,7 @@ void stationToString(StationData* station, char* out){
 int protocolSend(int sockfd, char type, char* data){
     Frame frame;
     char buffer[116];
-    char aux[116];
+    char aux[128];
     bzero(buffer, 0);
 
     //Make frame
@@ -129,6 +131,9 @@ int protocolSend(int sockfd, char type, char* data){
     frameToString(frame, buffer);
     buffer[115] = '\0';
     
+    //sprintf(aux, "Frame out: %s-%c-%s\n", frame.source, frame.type, frame.data);
+    //print(aux);
+
     //Send frame
     if(write(sockfd, buffer, 115) != 115) return -1;
     bzero(buffer, 116);

@@ -28,7 +28,7 @@
 #define DISCONNECTING "\nDisconnecting Wendy...\n\n"
 #define BYEDANNY "Disconnecting Danny (%s)\n\n"
 #define CONNECTION_WAITING "Waiting...\n"
-#define NEW_CONNECTION "New connection: %s\n\n"
+#define NEW_CONNECTION "New connection: %s\n"
 #define RECEIVING_DATA "Receiving data from %s\n"
 
 

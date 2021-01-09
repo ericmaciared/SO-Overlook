@@ -66,8 +66,10 @@ static void* handleDanny(void* args){
         //TODO: If image info fill image info
         if (type == 'F'){
             //Open image in append mode
+            print(imageLocation);
+            print(EOL);
             if((imagefd = open(imageLocation, O_WRONLY | O_APPEND)) < 0){
-                printf("Can't open image. -%d-\n", errno);
+                print("Can't open image.\n");
             }
 
             if (framesToProcess < 99) write(imagefd, buffer, framesToProcess);

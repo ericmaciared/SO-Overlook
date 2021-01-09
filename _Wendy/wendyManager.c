@@ -62,7 +62,6 @@ int acceptConnection(int sockfdServer, Station* client){
     socklen_t len = sizeof(s_addr);
     char buff[128];
 
-    print(CONNECTION_WAITING);
 
     //Waits for connection from client
     client->sockfd = accept(sockfdServer, (void *) &s_addr, &len);
@@ -83,6 +82,9 @@ int acceptConnection(int sockfdServer, Station* client){
 
     sprintf(buff, NEW_CONNECTION, client->name);
     print(buff);
+
+    print(PROMPT);
+    print(CONNECTION_WAITING);
     return 0;
 }
 

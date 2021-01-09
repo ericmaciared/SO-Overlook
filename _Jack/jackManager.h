@@ -23,7 +23,7 @@
 #define ERROR_ACCEPT "Error accepting new connection\n\n"
 #define ERROR_THREAD "Error creating new thread\n\n"
 
-#define JACK_PROMPT "\n$Jack:\n"
+#define PROMPT "\n$Jack:\n"
 #define STARTING "\nStarting Jack...\n"
 #define DISCONNECTING "\nDisconnecting Jack...\n\n"
 #define DISCONNECTING_LLOYD "\nDisconnecting Lloyd...\n\n"

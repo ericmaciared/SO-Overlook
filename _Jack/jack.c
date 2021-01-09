@@ -15,8 +15,8 @@
 semaphore sem_dataReady;
 semaphore sem_dataProcessed;
 semaphore sem_statistics;
-int volatile finish = 0;
-int volatile terminate = 0;
+int finish = 0;
+int terminate = 0;
 StationDataShared* shared;
 int memidShared;
 
@@ -78,8 +78,6 @@ char readFromDanny(Station* client){
     switch(type){
         // Receiving actual Data
         case 'D':
-            print(JACK_PROMPT);
-            print(RECEIVING_DATA);
             sds = convertToStationShared(&sd, client->name);
             showStationData(&sd);
 
@@ -122,7 +120,6 @@ static void* handleDanny(void* args){
         }
         if (type == 'Q' || type == 'X') break;
         else replyToDanny(client, type);
-
     }
 
     sprintf(buffer, "\nClosing %s station.\n", client->name);
@@ -187,6 +184,9 @@ int main(int argc, char const *argv[]){
         pfd.fd = sockfd;
         pfd.events = POLLIN;
 
+        print(PROMPT);
+        print(CONNECTION_WAITING);
+
         while (!terminate) {
             if (poll(&pfd, 1, 0) >= 0) {
                 if (pfd.revents & POLLIN){
@@ -200,7 +200,6 @@ int main(int argc, char const *argv[]){
                     else{
                         i++;
                     }
-
                 }
             }
         }
@@ -226,7 +225,6 @@ int main(int argc, char const *argv[]){
         SEM_destructor(&sem_dataProcessed);
         SEM_destructor(&sem_statistics);
 
-        print("SEMAPHORES DESTRUCTED \n\n");
     }
     return 0;
 }
