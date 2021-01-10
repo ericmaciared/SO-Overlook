@@ -132,16 +132,13 @@ int sendWendyData(char* address, char* file, int fdSocket){
     close(link[0]);
     close(link[1]);
     
-
     //Get file size
     size = getFileSize(location);
     bytesToSend = size;
 
-
     //Send 'I' frame
     sprintf(data, "%s#%d#%s", file, size, md5sum);
     protocolSend(fdSocket, 'I', data);
-
 
     //Send 'F' frames
     //Open image
@@ -162,7 +159,13 @@ int sendWendyData(char* address, char* file, int fdSocket){
     close(imagefd);
     bytesToSend = 0;
 
-    //TODO: Wait for response
+    //Wait for response
+    if (protocolReceive(fdSocket) == 0){
+       print("Data sent correctly\n");
+    }
+    else{
+        print("Data sent incorrectly\n");
+    }
 
     //Free remaining dynamic data
     free(md5sum);
@@ -308,7 +311,7 @@ int scanDirectory(Data* data, Station danny){
                         getStationData(buffer, &station);
                         showStationData(&station);
 
-                        //remove(buffer);
+                        remove(buffer);
 
                         //Send to Jack
                         if (sendJackData(&station, danny.jacksockfd) < 0){
@@ -324,13 +327,15 @@ int scanDirectory(Data* data, Station danny){
                         print(files[i]);
                         print(EOL);
 
-                        //remove(buffer);
-
                         //Send to Wendy
                         if (sendWendyData(data->path, files[i], danny.wendysockfd) < 0){
                             print("ERROR sending data to Wendy.\n");
                         }
                         else print(DATA_SENT);
+
+                        sprintf(buffer, ".%s/%s", data->path, files[i]);
+                        remove(buffer);
+                        
                         break;
 
                     default:

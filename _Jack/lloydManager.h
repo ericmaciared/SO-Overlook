@@ -31,12 +31,11 @@
 #define PROCESSED_DATA "Data processed correctly!\n"
 #define LLOYD_FILE_REWRITE "\n$Lloyd:\nRewriting Hallorann.txt\n"
 
-
 #define HALLORANN_PATH "Hallorann.txt"
-#define REWRITE_TIME 10
+#define REWRITE_TIME 120
 
 typedef struct StationStatistics{
-    char nameString[STATION_NAME_LENGTH];
+    char nameString[100];
     int readings;
     float temperature;
     float humidity;

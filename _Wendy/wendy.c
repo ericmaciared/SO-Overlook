@@ -43,12 +43,9 @@ static void* handleDanny(void* args){
 
     while (!terminate){
         //Wait for new information on socket
-        while (!terminate){
-            if (poll(&pfd, 1, 0) >= 0){
-                if (pfd.revents & POLLIN){
-                    type = readFromDanny(client, buffer);
-                    break;
-                }
+        if (poll(&pfd, 1, -1) >= 0 || terminate){
+            if (pfd.revents & POLLIN){
+                type = readFromDanny(client, buffer);
             }
         }
         
@@ -66,25 +63,17 @@ static void* handleDanny(void* args){
         //TODO: If image info fill image info
         if (type == 'F'){
             //Open image in append mode
-            print(imageLocation);
-            print(EOL);
-            if((imagefd = open(imageLocation, O_WRONLY | O_APPEND)) < 0){
-                print("Can't open image.\n");
-            }
+            if((imagefd = open(imageLocation, O_WRONLY | O_APPEND)) < 0) print("Can't open image.\n");
 
             if (framesToProcess < 99) write(imagefd, buffer, framesToProcess);
             else write(imagefd, buffer, 99);
             
             close(imagefd);
             
-            //sprintf(bufferout, "Bytes remaining: -%d-\n", framesToProcess);
-            //write(1, bufferout, strlen(bufferout));
-            
             framesToProcess-=99;
 
             //If finished transmission send reply and post image in Barry
             if (framesToProcess <= 0){
-                //print("Receiving image data and checking data integrity\n");
                 
                 //Check md5sum
                 sprintf(buffer, "./Barry/%s", imageName);
@@ -104,7 +93,6 @@ static void* handleDanny(void* args){
                 }
                 
                 //Reset variables
-
                 framesToProcess = -1;
                 imageSize = 0;
                 bzero(imageLocation, 0);
@@ -120,7 +108,7 @@ static void* handleDanny(void* args){
     free(imageName);
     free(md5sum);
 
-    sprintf(buffer, "Closing %s station.\n", client->name);
+    sprintf(buffer, "\nClosing %s station.\n", client->name);
     print(buffer);
 
     //Close client socket
@@ -162,14 +150,13 @@ int main(int argc, char const *argv[]){
     print(CONNECTION_WAITING);
 
     while (!finish) {
-        if (poll(&pfd, 1, 0) >= 0) {
+        if (poll(&pfd, 1, -1) >= 0 || finish) {
             if (pfd.revents & POLLIN){
-                if (acceptConnection(sockfd, &clients[i]) < 0 || terminate) break;
+                if (acceptConnection(sockfd, &clients[i]) < 0 || finish) continue;
                 if (pthread_create(&tid[i], NULL, handleDanny, &clients[i]) != 0){
                     print(ERROR_THREAD);
                     close(clients[i].sockfd);
                     i--;
-                    break;
                 }
                 else i++;
             } 

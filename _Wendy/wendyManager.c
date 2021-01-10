@@ -175,6 +175,7 @@ int checkMD5SUM(char* origin, char* current){
     pid_t pid;
     int link[2];
     char* md5sum;
+    int ans = -1;
 
     //Get MD5SUM from file
     if (pipe(link) < 0) return -1;
@@ -196,6 +197,10 @@ int checkMD5SUM(char* origin, char* current){
 
     close(link[0]);
     close(link[1]);
+
+    ans = strcmp(origin, md5sum);
+
+    free(md5sum);
     
-    return strcmp(origin, md5sum);
+    return ans;
 }

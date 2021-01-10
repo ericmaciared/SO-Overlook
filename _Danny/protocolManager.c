@@ -91,9 +91,6 @@ int protocolConnection(int sockfd, char* name){
     frameToString(frame, buffer);
     buffer[115] = '\0';
 
-    //sprintf(aux, "Frame out: %s-%c-%s\n", frame.source, frame.type, frame.data);
-    //print(aux);
-
     write(sockfd, buffer, 115);
 
     //Connection Reply
@@ -147,5 +144,16 @@ int protocolSend(int sockfd, char type, char* data){
     //No reply for image transmissions
     if (type == 'F' || type == 'I') return 0;
 
+    return -1;
+}
+
+int protocolReceive(int sockfd){
+    char buffer[128];
+    char aux[128];
+
+    read(sockfd, buffer, 115);
+    if (checkFrame(buffer, 'S', aux) > 0) return 0;
+    if (checkFrame(buffer, 'R', aux) > 0) return -1;
+    
     return -1;
 }

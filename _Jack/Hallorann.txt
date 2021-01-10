@@ -1,12 +1,14 @@
 Igualada
-	Temperature: 23.50
-	Humidity: 72.00%
-	Pressure: 1007.70
-	Precipitation: 3.00
+	Temperature: 24.50
+	Humidity: 73.00%
+	Pressure: 1014.20
+	Precipitation: 2.50
 
-Sant Celoni
-	Temperature: 23.50
-	Humidity: 72.00%
-	Pressure: 1007.70
-	Precipitation: 3.00
+0
+
+t Celoni
+	Temperature: 22.79
+	Humidity: 71.29%
+	Pressure: 1003.06
+	Precipitation: 3.36
 

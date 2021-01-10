@@ -15,10 +15,12 @@
 semaphore sem_dataReady;
 semaphore sem_dataProcessed;
 semaphore sem_statistics;
-int finish = 0;
-int terminate = 0;
+int volatile finish = 0;
+int volatile terminate = 0;
 StationDataShared* shared;
 int memidShared;
+LloydStruct lloyd_struct;
+
 
 
 //FUNCTIONS
@@ -28,34 +30,29 @@ void ksighandler(){
     signal(SIGINT, ksighandler);
 }
 
-static void* handleTextFile(void* args){
-    LloydStruct* ls = (LloydStruct*) args;
-    time_t timeout;
-
-    while (!finish){
-        timeout = time(NULL);
-        while (time(NULL) - timeout <= REWRITE_TIME && !finish){
-        }
-        if (finish) break;
-        SEM_wait(&sem_statistics);
-        writeToFile(ls->stations, HALLORANN_PATH, ls->numStations);
-        SEM_signal(&sem_statistics);
-    }
-    return (void*) 0;
+void handleTextFile(){
+    SEM_wait(&sem_statistics);
+    writeToFile(lloyd_struct.stations, HALLORANN_PATH, lloyd_struct.numStations);
+    SEM_signal(&sem_statistics);
 }
 
+void ksigalarmhandler(){
+    handleTextFile();
+    signal(SIGALRM, ksigalarmhandler);
+    alarm(REWRITE_TIME);
+}
 
 int lloyd(){
-    pthread_t printtid;
-    LloydStruct lloyd_struct;
+    signal(SIGALRM, ksigalarmhandler);
+    alarm(REWRITE_TIME);
 
     lloyd_struct.stations = (StationStatistics*) malloc(sizeof(StationStatistics));
     lloyd_struct.numStations = 0;
-    if (pthread_create(&printtid, NULL, handleTextFile, &lloyd_struct) != 0) print(ERROR_THREAD);
 
     //Communicate with Jack
     while (!finish) {
         SEM_wait(&sem_dataReady);
+        if (errno == EINTR) continue;
 
         // Make sure we are not printing
         SEM_wait(&sem_statistics);
@@ -65,7 +62,7 @@ int lloyd(){
         // Signal Jack about process done
         SEM_signal(&sem_dataProcessed);
     }
-    pthread_join(printtid, NULL);
+
     free(lloyd_struct.stations);
     return 0;
 }
@@ -78,6 +75,8 @@ char readFromDanny(Station* client){
     switch(type){
         // Receiving actual Data
         case 'D':
+            print(PROMPT);
+            print(RECEIVING_DATA);
             sds = convertToStationShared(&sd, client->name);
             showStationData(&sd);
 
@@ -110,16 +109,13 @@ static void* handleDanny(void* args){
 
     // Check loop to read from Danny
     while (!terminate){
-        while (!terminate){
-            if (poll(&pfd, 1, 0) >= 0){
-                if (pfd.revents & POLLIN){
-                    type = readFromDanny(client);
-                    break;
-                }
+        if (poll(&pfd, 1, -1) >= 0 || terminate){
+            if (pfd.revents & POLLIN){
+                type = readFromDanny(client);
+                if (type == 'Q' || type == 'X') break;
+                else replyToDanny(client, type);
             }
         }
-        if (type == 'Q' || type == 'X') break;
-        else replyToDanny(client, type);
     }
 
     sprintf(buffer, "\nClosing %s station.\n", client->name);
@@ -166,15 +162,14 @@ int main(int argc, char const *argv[]){
     SEM_init(&sem_dataProcessed, 1);
     SEM_init(&sem_statistics, 1);
 
-
     // Create fork for Lloyd
-    if ((lloydPID = fork()) < 0){
-        exit(EXIT_FAILURE);
-
-    } if (lloydPID == 0){
+    if ((lloydPID = fork()) < 0) exit(EXIT_FAILURE);
+    
+    if (lloydPID == 0){
         lloyd();
         shmdt(shared);
-    } else{
+    } 
+    else{
         // Create socket
         sockfd = initServer(&config);
         if (sockfd < 0) {
@@ -186,20 +181,16 @@ int main(int argc, char const *argv[]){
 
         print(PROMPT);
         print(CONNECTION_WAITING);
-
-        while (!terminate) {
-            if (poll(&pfd, 1, 0) >= 0) {
+        while (!finish) {
+            if (poll(&pfd, 1, -1) >= 0 || finish) {
                 if (pfd.revents & POLLIN){
-                    if (acceptConnection(sockfd, &clients[i]) < 0 || terminate) break;
+                    if (acceptConnection(sockfd, &clients[i]) < 0 || finish) break;
                     if (pthread_create(&tid[i], NULL, handleDanny, &clients[i]) != 0){
                         print(ERROR_THREAD);
                         close(clients[i].sockfd);
                         i--;
-                        break;
                     }
-                    else{
-                        i++;
-                    }
+                    else i++;
                 }
             }
         }
@@ -212,7 +203,7 @@ int main(int argc, char const *argv[]){
         // Wait for all threads to join
         for (int j = 0; j < i; j++){
             pthread_join(tid[j], NULL);
-            free(clients[j].name);
+            if(clients[j].name != NULL) free(clients[j].name);
         }
 
         // Free all dynamic data
@@ -224,7 +215,7 @@ int main(int argc, char const *argv[]){
         SEM_destructor(&sem_dataReady);
         SEM_destructor(&sem_dataProcessed);
         SEM_destructor(&sem_statistics);
-
     }
+    
     return 0;
 }

@@ -56,4 +56,6 @@ void stationToString(StationData* station, char* out);
 
 int protocolSend(int sockfd, char type, char* data);
 
+int protocolReceive(int sockfd);
+
 #endif

@@ -76,12 +76,13 @@ int main(int argc, char const *argv[]){
         if (poll(pfds, 2, 0) >= 0){
             if ((pfds[0].revents & POLLIN) || (pfds[0].revents & POLLHUP) || 
                ((pfds[1].revents & POLLIN) || (pfds[1].revents & POLLHUP))) {
+                   print("Exiting\n");
                 finish = 1;
                 break;
             }
         }
         
-        if (scanDirectory(&data, station) < 0) break;
+        scanDirectory(&data, station);
 
         alarm(data.time);
         pause();

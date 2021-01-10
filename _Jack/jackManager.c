@@ -63,14 +63,17 @@ int acceptConnection(int sockfdServer, Station* client){
     //Waits for connection from client
     client->sockfd = accept(sockfdServer, (void *) &s_addr, &len);
 
-    if (client->sockfd < 0 || errno == EINTR){
+    if (client->sockfd < 0){
         print(ERROR_ACCEPT);
+                print("2\n");
+
         return -1;
     }
 
     //Communication protocol established
     if(protocolConnection(client->sockfd, buff) < 0){
         print(ERROR_ACCEPT);
+        print("1\n");
         return -1;
     }
 

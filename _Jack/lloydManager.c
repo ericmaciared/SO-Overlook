@@ -73,3 +73,4 @@ void writeToFile(StationStatistics* statistics, const char* file, int numStation
 
 
 
+
