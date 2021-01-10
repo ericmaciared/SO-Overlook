@@ -20,16 +20,20 @@ void ksighandler(){
     finish = 1;
 }
 
+void ksigalarmhandler(){
+    signal(SIGALRM, ksigalarmhandler);
+}
+
 int main(int argc, char const *argv[]){
     Data data;
     Station station;
-    time_t timeout;
     struct pollfd *pfds;
 
     print(STARTING);
 
     //Activate signal interruption
     signal(SIGINT, ksighandler);
+    signal(SIGALRM, ksigalarmhandler);
 
     //Check correct arguments
     if (argc <= 1 || argc > 2){
@@ -69,18 +73,18 @@ int main(int argc, char const *argv[]){
     pfds[1].fd = station.wendysockfd;
     pfds[1].events = POLLIN | POLLHUP;
     while (!finish){
-        if (scanDirectory(&data, station) < 0) break;
-
-        timeout = time(NULL);
-        while (time(NULL) - timeout <= data.time && !finish){
-            if (poll(pfds, 2, 0) >= 0){
-                if ((pfds[0].revents & POLLIN) || (pfds[0].revents & POLLHUP) || 
-                ((pfds[1].revents & POLLIN) || (pfds[1].revents & POLLHUP))){
-                    finish = 1;
-                    break;
-                }
+        if (poll(pfds, 2, 0) >= 0){
+            if ((pfds[0].revents & POLLIN) || (pfds[0].revents & POLLHUP) || 
+               ((pfds[1].revents & POLLIN) || (pfds[1].revents & POLLHUP))) {
+                finish = 1;
+                break;
             }
         }
+        
+        if (scanDirectory(&data, station) < 0) break;
+
+        alarm(data.time);
+        pause();
     }
     
     free(pfds);

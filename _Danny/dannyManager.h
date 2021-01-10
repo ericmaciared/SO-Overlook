@@ -25,15 +25,15 @@
 #define ERROR_IP "Error processing invalid IP\n\n"
 #define ERROR_CONNECT "Error connecting to server\n\n"
 
-#define PROMPT "\n$%s\n"
+#define PROMPT "\n$%s:\n"
 #define STARTING "\nStarting Danny...\n\n"
 #define DISCONNECT_DANNY "Disconnecting Danny...\n\n"
 #define CONNECTING_JACK "Connecting Jack...\n"
 #define CONNECTED_JACK "Connected to Jack.\n"
-#define DISCONNECT_JACK "\nDisconnecting Jack...\n"
+#define DISCONNECT_JACK "Disconnecting Jack...\n"
 #define CONNECTING_WENDY "Connecting Wendy...\n"
 #define CONNECTED_WENDY "Connected to Wendy.\n"
-#define DISCONNECT_WENDY "\nDisconnecting Wendy...\n"
+#define DISCONNECT_WENDY "Disconnecting Wendy...\n"
 
 #define SENDING_DATA "Sending data...\n"
 #define DATA_SENT "Data sent.\n"
