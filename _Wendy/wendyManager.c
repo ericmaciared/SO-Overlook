@@ -25,6 +25,7 @@ int processConfig(Config* config, const char* file){
         buffer = readUntil(fd, '\n');
         config->port = atoi(buffer);
         free(buffer);
+        close(fd);
     }
     return 1;
 }

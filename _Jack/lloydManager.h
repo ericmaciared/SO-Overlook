@@ -32,7 +32,7 @@
 #define LLOYD_FILE_REWRITE "\n$Lloyd:\nRewriting Hallorann.txt\n"
 
 #define HALLORANN_PATH "Hallorann.txt"
-#define REWRITE_TIME 120
+#define REWRITE_TIME 300
 
 typedef struct StationStatistics{
     char nameString[100];
@@ -55,7 +55,7 @@ typedef struct LloydStruct{
  * @param: station pointer to struct with name and socket fd
  * @return: char value for new response from server
  */
-int readFromMemory(StationDataShared* shared, StationStatistics* stations, int* numStations);
+int readFromMemory(StationDataShared* shared, LloydStruct* lloyd_struct);
 
 /**
  * This function will write the statistics to the Hallorann.txt

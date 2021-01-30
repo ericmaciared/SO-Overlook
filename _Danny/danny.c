@@ -50,6 +50,7 @@ int main(int argc, char const *argv[]){
     station.name = data.station;
     station.jacksockfd = connectToServer(&data, station, 1);
     if(station.jacksockfd < 0){
+        close(station.jacksockfd);
         freeConfig(&data);
         exit(EXIT_FAILURE);
     }
@@ -61,6 +62,7 @@ int main(int argc, char const *argv[]){
         freeConfig(&data);
         disconnectJack(&station);
         close(station.jacksockfd);
+        close(station.wendysockfd);
         exit(EXIT_FAILURE);
     }
     print(CONNECTED_WENDY);
@@ -72,6 +74,7 @@ int main(int argc, char const *argv[]){
     pfds[0].events = POLLIN | POLLHUP;
     pfds[1].fd = station.wendysockfd;
     pfds[1].events = POLLIN | POLLHUP;
+    
     while (!finish){
         if (poll(pfds, 2, 0) >= 0){
             if ((pfds[0].revents & POLLIN) || (pfds[0].revents & POLLHUP) || 

@@ -111,6 +111,7 @@ int sendWendyData(char* address, char* file, int fdSocket){
 
     //Get MD5SUM from file
     sprintf(location, ".%s/%s", address, file);
+    print(location);
 
     if (pipe(link) < 0) return -1;
     if ((pid = fork()) < 0) return -1;
@@ -138,6 +139,7 @@ int sendWendyData(char* address, char* file, int fdSocket){
 
     //Send 'I' frame
     sprintf(data, "%s#%d#%s", file, size, md5sum);
+    print(data);
     protocolSend(fdSocket, 'I', data);
 
     //Send 'F' frames

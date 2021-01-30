@@ -15,12 +15,14 @@
 semaphore sem_dataReady;
 semaphore sem_dataProcessed;
 semaphore sem_statistics;
-int volatile finish = 0;
-int volatile terminate = 0;
+
+int finish = 0;
+int terminate = 0;
+
 StationDataShared* shared;
 int memidShared;
-LloydStruct lloyd_struct;
 
+LloydStruct lloyd_struct;
 
 
 //FUNCTIONS
@@ -31,9 +33,9 @@ void ksighandler(){
 }
 
 void handleTextFile(){
-    SEM_wait(&sem_statistics);
+    //SEM_wait(&sem_statistics);
     writeToFile(lloyd_struct.stations, HALLORANN_PATH, lloyd_struct.numStations);
-    SEM_signal(&sem_statistics);
+    //SEM_signal(&sem_statistics);
 }
 
 void ksigalarmhandler(){
@@ -43,6 +45,7 @@ void ksigalarmhandler(){
 }
 
 int lloyd(){
+
     signal(SIGALRM, ksigalarmhandler);
     alarm(REWRITE_TIME);
 
@@ -51,15 +54,15 @@ int lloyd(){
 
     //Communicate with Jack
     while (!finish) {
-        SEM_wait(&sem_dataReady);
+        SEM_wait(&sem_dataReady); 
         if (errno == EINTR) continue;
 
         // Make sure we are not printing
-        SEM_wait(&sem_statistics);
-        readFromMemory(shared, lloyd_struct.stations, &lloyd_struct.numStations);
-        SEM_signal(&sem_statistics);
+        //SEM_wait(&sem_statistics);
+        readFromMemory(shared, &lloyd_struct);
+        //SEM_signal(&sem_statistics);
 
-        // Signal Jack about process done
+        // Signal Danny about process done
         SEM_signal(&sem_dataProcessed);
     }
 
@@ -112,6 +115,8 @@ static void* handleDanny(void* args){
         if (poll(&pfd, 1, -1) >= 0 || terminate){
             if (pfd.revents & POLLIN){
                 type = readFromDanny(client);
+                print("Received type = ");
+                write(1, &type, 1);
                 if (type == 'Q' || type == 'X') break;
                 else replyToDanny(client, type);
             }
@@ -137,7 +142,6 @@ int main(int argc, char const *argv[]){
     pid_t lloydPID;
 
     // Reprogram signals
-    signal(SIGINT, ksighandler);
 
     // Check correct arguments
     if (argc <= 1 || argc > 2){
@@ -149,9 +153,29 @@ int main(int argc, char const *argv[]){
     if(!processConfig(&config, argv[argc -1])) exit(EXIT_FAILURE);
     print(STARTING);
 
+    // Create socket
+    sockfd = initServer(&config);
+    if (sockfd < 0) {
+        free(config.ip);
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+    // Accept connections and assign threads indefinitely
+    pfd.fd = sockfd;
+    pfd.events = POLLIN;
+
     // Init shared memory
-    if ((memidShared = shmget(IPC_PRIVATE,sizeof(StationDataShared),IPC_CREAT|IPC_EXCL|0600)) < 0) exit(EXIT_FAILURE);
-    if((shared = (StationDataShared*) shmat(memidShared,NULL,0)) == (StationDataShared*) - 1) exit(EXIT_FAILURE);
+    if((memidShared = shmget(IPC_PRIVATE,sizeof(StationDataShared),IPC_CREAT|IPC_EXCL|0600)) < 0) {
+        free(config.ip);
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+    if((shared = (StationDataShared*) shmat(memidShared,NULL,0)) == (StationDataShared*) - 1) {
+        free(config.ip);
+        close(sockfd);
+        shmctl(memidShared, IPC_RMID, NULL);
+        exit(EXIT_FAILURE);
+    }
 
     // Semaphores init and creation
     SEM_constructor(&sem_dataReady);
@@ -163,22 +187,25 @@ int main(int argc, char const *argv[]){
     SEM_init(&sem_statistics, 1);
 
     // Create fork for Lloyd
-    if ((lloydPID = fork()) < 0) exit(EXIT_FAILURE);
-    
+    if ((lloydPID = fork()) < 0) {
+        free(config.ip);
+        close(sockfd);
+        shmdt(shared);
+        shmctl(memidShared, IPC_RMID, NULL);
+        SEM_destructor(&sem_dataReady);
+        SEM_destructor(&sem_dataProcessed);
+        SEM_destructor(&sem_statistics);
+        exit(EXIT_FAILURE);
+    }
+
     if (lloydPID == 0){
+        //Lloyd process
+        signal(SIGINT, ksighandler);
         lloyd();
         shmdt(shared);
     } 
     else{
-        // Create socket
-        sockfd = initServer(&config);
-        if (sockfd < 0) {
-            exit(EXIT_FAILURE);
-        }
-        // Accept connections and assign threads indefinitely
-        pfd.fd = sockfd;
-        pfd.events = POLLIN;
-
+        signal(SIGINT, ksighandler);
         print(PROMPT);
         print(CONNECTION_WAITING);
         while (!finish) {
@@ -197,10 +224,10 @@ int main(int argc, char const *argv[]){
 
         print(DISCONNECTING);
 
-        // Wait for fork to finish
+        // Wait for lloyd fork to finish
         wait(NULL);
 
-        // Wait for all threads to join
+        // Wait for all danny threads to join
         for (int j = 0; j < i; j++){
             pthread_join(tid[j], NULL);
             if(clients[j].name != NULL) free(clients[j].name);
@@ -208,6 +235,8 @@ int main(int argc, char const *argv[]){
 
         // Free all dynamic data
         free(config.ip);
+
+        close(sockfd);
 
         shmdt(shared);
         shmctl(memidShared, IPC_RMID, NULL);

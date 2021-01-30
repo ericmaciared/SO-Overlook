@@ -23,6 +23,7 @@ int processConfig(Config* config, const char* file){
         buffer = readUntil(fd, '\n');
         config->port = atoi(buffer);
         free(buffer);
+        close(fd);
     }
     return 1;
 }
@@ -90,12 +91,15 @@ int acceptConnection(int sockfdServer, Station* client){
 
 int replyToDanny(Station* client, char type){
     char buffer[64];
+
     switch(type){
         case 'D':
+            print("Sending DATAOK to DANNY\n");
             protocolResponse(client->sockfd, 'B', DATAOK);
             return 0;
 
         case 'K':
+            print("Sending DATAKO to DANNY\n");
             protocolResponse(client->sockfd, 'K', DATAKO);
             return 0;
 

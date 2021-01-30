@@ -184,14 +184,6 @@ int protocolConnection(int sockfdclient, char* out){
     //Connection Request
     read(sockfdclient, &buffer, 115);
 
-    /*print("Received: ");
-
-    for (int i = 0; i < 115; i++){
-        sprintf(aux, "-%c-", buffer[i]);
-        print(aux);
-    }*/
-
-
     if (checkFrame(buffer, 'C', out) > 0){
         bzero(buffer, 115);
         strcpy(frame.source, JACK);
@@ -224,14 +216,6 @@ char protocolRead(int sockfdclient, StationData* station){
     //Connection Request
     read(sockfdclient, buffer, 115);
     buffer[115] = 0;
-
-    /*
-    print("Received: ");
-    for (int i = 0; i < 115; i++){
-        sprintf(aux, "-%c-", buffer[i]);
-        print(aux);
-    }
-    */
 
     //Check if atmospheric data
     if (checkFrame(buffer, 'D', aux) > 0){

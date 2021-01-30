@@ -140,7 +140,10 @@ int main(int argc, char const *argv[]){
     print(STARTING);
 
     sockfd = initServer(&config);
-    if (sockfd < 0) exit(EXIT_FAILURE); 
+    if (sockfd < 0) {
+        free(config.ip);
+        exit(EXIT_FAILURE);
+    } 
 
     //Accept connections and assign threads indefinitely
     pfd.fd = sockfd;
@@ -175,6 +178,8 @@ int main(int argc, char const *argv[]){
     for (int j = 0; j < i; j++){
         free(clients[j].name);
     }
+
+    close(sockfd);
 
     print("All threads returned\n");
 

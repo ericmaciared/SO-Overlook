@@ -1,14 +1,6 @@
 Igualada
-	Temperature: 24.50
-	Humidity: 73.00%
-	Pressure: 1014.20
-	Precipitation: 2.50
-
-0
-
-t Celoni
-	Temperature: 22.79
-	Humidity: 71.29%
-	Pressure: 1003.06
-	Precipitation: 3.36
+	Temperature: 2.50
+	Humidity: 62.50%
+	Pressure: 1014.00
+	Precipitation: 2.75
 

@@ -127,9 +127,6 @@ int protocolSend(int sockfd, char type, char* data){
     //Serialize frame
     frameToString(frame, buffer);
     buffer[115] = '\0';
-    
-    //sprintf(aux, "Frame out: %s-%c-%s\n", frame.source, frame.type, frame.data);
-    //print(aux);
 
     //Send frame
     if(write(sockfd, buffer, 115) != 115) return -1;
@@ -138,6 +135,17 @@ int protocolSend(int sockfd, char type, char* data){
     //Get reply for data transmissions
     if(type == 'D'){
         read(sockfd, buffer, 115);
+        
+        
+        print("-");
+        for (int i = 0; i < 115; i++)
+        {
+            if (buffer[i] == 0)print("!");
+            else write(1, &buffer[i], 1);
+        }
+        
+        print("-\n");
+
         if (checkFrame(buffer, 'B', aux) > 0) return 0;
     }
 
