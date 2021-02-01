@@ -51,7 +51,8 @@ int readFromMemory(StationDataShared* shared, LloydStruct* lloyd_struct){
     }
 
     //New station
-    lloyd_struct->stations = realloc(lloyd_struct->stations, (lloyd_struct->numStations + 1) * sizeof(StationStatistics));
+    lloyd_struct->stations = realloc(lloyd_struct->stations, 
+        (lloyd_struct->numStations + 1) * sizeof(StationStatistics));
     strcpy(lloyd_struct->stations[i].nameString, shared->nameString);
     lloyd_struct->stations[i].temperature = shared->temperature;
     lloyd_struct->stations[i].humidity = shared->humidity;

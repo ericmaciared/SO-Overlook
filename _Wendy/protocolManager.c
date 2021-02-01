@@ -136,6 +136,7 @@ char protocolRead(int sockfdclient, char* out){
 void protocolResponse(int sockfdclient, char responseType, char* response){
     Frame frame;
     char buffer[115];
+    bzero(buffer, 0);
 
     //Reply with responseType
     strcpy(frame.source, WENDY);

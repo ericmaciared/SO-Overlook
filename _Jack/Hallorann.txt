@@ -1,6 +1,0 @@
-Igualada
-	Temperature: 2.50
-	Humidity: 62.50%
-	Pressure: 1014.00
-	Precipitation: 2.75
-

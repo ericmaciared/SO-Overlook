@@ -112,7 +112,7 @@ static void* handleDanny(void* args){
 
     // Check loop to read from Danny
     while (!terminate){
-        if (poll(&pfd, 1, -1) >= 0 || terminate){
+        if (poll(&pfd, 1, 0) >= 0 || terminate){
             if (pfd.revents & POLLIN){
                 type = readFromDanny(client);
                 print("Received type = ");

@@ -24,6 +24,7 @@ void ksighandler(){
 static void* handleDanny(void* args){
     Station* client = (Station *) args;
     char buffer[128];
+    char aux[128];
     char type = 0;
     struct pollfd pfd;
 
@@ -45,6 +46,7 @@ static void* handleDanny(void* args){
         //Wait for new information on socket
         if (poll(&pfd, 1, -1) >= 0 || terminate){
             if (pfd.revents & POLLIN){
+                bzero(buffer, 0);
                 type = readFromDanny(client, buffer);
             }
         }
@@ -68,6 +70,9 @@ static void* handleDanny(void* args){
             if (framesToProcess < 99) write(imagefd, buffer, framesToProcess);
             else write(imagefd, buffer, 99);
             
+            sprintf(aux, "Frames to process: %d/%d\n", framesToProcess, imageSize);
+            print(aux);
+
             close(imagefd);
             
             framesToProcess-=99;
@@ -83,10 +88,13 @@ static void* handleDanny(void* args){
                     print(EOL);
 
                     replyToDanny(client, 'S');
+                    print("Image is correct notifying DANNY\n");
+
                 }
                 else {
                     //Send Reply
                     replyToDanny(client, 'R');
+                    print("Image is incorrect notifying DANNY\n");
 
                     //Delete file
                     remove(imageLocation);

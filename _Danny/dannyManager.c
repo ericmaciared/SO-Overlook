@@ -99,7 +99,7 @@ int sendJackData(StationData* station, int fdSocket){
 
 int sendWendyData(char* address, char* file, int fdSocket){
     char data[100];
-
+    char aux[128];
     pid_t pid;
     int link[2];
     char* md5sum;
@@ -132,6 +132,8 @@ int sendWendyData(char* address, char* file, int fdSocket){
 
     close(link[0]);
     close(link[1]);
+
+    print("Finished MD5SUM!\n");
     
     //Get file size
     size = getFileSize(location);
@@ -156,6 +158,9 @@ int sendWendyData(char* address, char* file, int fdSocket){
 
         //Make frame and send it to Wendy
         protocolSend(fdSocket, 'F', data);
+        sprintf(aux, "Frames to process: %d/%d\n", bytesToSend, size);
+        print(aux);
+        usleep(100);
     }
 
     close(imagefd);
