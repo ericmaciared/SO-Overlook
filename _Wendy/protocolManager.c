@@ -136,12 +136,15 @@ char protocolRead(int sockfdclient, char* out){
 void protocolResponse(int sockfdclient, char responseType, char* response){
     Frame frame;
     char buffer[115];
+    
     bzero(buffer, 0);
+    bzero(frame.source, 0);
+    bzero(frame.data, 0);
 
     //Reply with responseType
-    strcpy(frame.source, WENDY);
+    strcat(frame.source, WENDY);
     frame.type = responseType;
-    strcpy(frame.data, response);
+    strcat(frame.data, response);
 
     frameToString(frame, buffer);
     write(sockfdclient, buffer, 115);

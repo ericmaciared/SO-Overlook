@@ -30,6 +30,7 @@ void frameToString(Frame frame, char* final){
 
 Frame makeFrame(char type, char* data){
     Frame frame;
+    bzero(frame.source, 0);
     strcpy(frame.source, DANNY);
 
     frame.type = type;
@@ -117,8 +118,11 @@ void stationToString(StationData* station, char* out){
 
 int protocolSend(int sockfd, char type, char* data){
     Frame frame;
-    char buffer[116];
-    char aux[128];
+    char buffer[116] = "";
+    char aux[128] = "";
+
+    bzero(frame.data, 0);
+    bzero(frame.source, 0);
     bzero(buffer, 0);
 
     //Make frame
@@ -135,7 +139,6 @@ int protocolSend(int sockfd, char type, char* data){
     //Get reply for data transmissions
     if(type == 'D'){
         read(sockfd, buffer, 115);
-        
         
         print("-");
         for (int i = 0; i < 115; i++)

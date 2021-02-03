@@ -257,12 +257,14 @@ int connectToServer(Data* data, Station station, int serverId){
     
     //Connect to socket
     if (connect(sockfd, (void *) &s_addr, sizeof(s_addr)) < 0){
+        close(sockfd);
         print(ERROR_CONNECT);
         return -1;
     }
 
     //Communication protocol
     if (protocolConnection(sockfd, station.name) < 0){
+        close(sockfd);
         print(ERROR_CONNECT);
         return -1;
     }

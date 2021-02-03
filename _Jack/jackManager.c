@@ -46,6 +46,7 @@ int initServer(Config* config){
     s_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if (bind(sockfd, (void *) &s_addr, sizeof(s_addr)) != 0){
+        close(sockfd);
         print(ERROR_BIND);
         return -1;
     }

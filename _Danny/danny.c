@@ -96,6 +96,8 @@ int main(int argc, char const *argv[]){
     if (finish) {
         disconnectJack(&station);
         disconnectWendy(&station);
+        close(station.jacksockfd);
+        close(station.wendysockfd); 
     }
 
     freeConfig(&data);

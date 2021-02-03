@@ -11,20 +11,22 @@ void print(char* out){
 }
 
 char* readUntil(int fd, char delimiter) {
-    int i = 0, size;
+    int i = 0, size = 0;
     char buff = '\0';
-    char* string = (char*)malloc(sizeof(char));
+    //Size 1
+    char* string = (char*) malloc(sizeof(char));
 
     while (1) {
         size = read(fd, &buff, sizeof(char));
-        // "Igualada\r\n"
         if (buff != delimiter && size > 0) {
             string[i] = buff;
-            string = (char*)realloc(string, sizeof(char) * (++i + 1));
-        } else {
-            break;
-        }
+            //size filled + 1
+            i+=1;
+            string = (char*) realloc(string, sizeof(char) * (i + 1));
+        } 
+        else break;
     }
+    
     string[i] = '\0';
     return string;
 }
