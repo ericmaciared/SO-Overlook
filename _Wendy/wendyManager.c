@@ -63,7 +63,7 @@ int acceptConnection(int sockfdServer, Station* client){
     struct sockaddr_in s_addr;
     socklen_t len = sizeof(s_addr);
     char buff[128];
-
+    bzero(buff, 128);
 
     //Waits for connection from client
     client->sockfd = accept(sockfdServer, (void *) &s_addr, &len);

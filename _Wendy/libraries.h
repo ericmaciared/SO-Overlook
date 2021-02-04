@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <time.h>
+#include <sys/time.h>  
 #include <math.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>

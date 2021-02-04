@@ -76,6 +76,8 @@ int protocolConnection(int sockfdclient, char* out){
     Frame frame;
     char buffer[116];
     bzero(buffer, 116);
+    bzero(frame.source, 14);
+    bzero(frame.data, 100);
 
     //Connection Request
     read(sockfdclient, &buffer, 115);
@@ -106,8 +108,8 @@ int protocolConnection(int sockfdclient, char* out){
 char protocolRead(int sockfdclient, char* out){
     char buffer[116];
     char aux[116];
-    bzero(buffer, 0);
-    bzero(aux, 0);
+    bzero(buffer, 116);
+    bzero(aux, 116);
 
     //Connection Request
     read(sockfdclient, buffer, 115);
@@ -135,11 +137,11 @@ char protocolRead(int sockfdclient, char* out){
 
 void protocolResponse(int sockfdclient, char responseType, char* response){
     Frame frame;
-    char buffer[115];
+    char buffer[115] = "";
     
-    bzero(buffer, 0);
-    bzero(frame.source, 0);
-    bzero(frame.data, 0);
+    bzero(buffer, 115);
+    bzero(frame.source, 14);
+    bzero(frame.data, 100);
 
     //Reply with responseType
     strcat(frame.source, WENDY);

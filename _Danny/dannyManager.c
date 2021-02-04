@@ -109,6 +109,8 @@ int sendWendyData(char* address, char* file, int fdSocket){
     int bytesToSend = -1;
     int imagefd = -1;
 
+    struct timeval begin, end;
+
     //Get MD5SUM from file
     sprintf(location, ".%s/%s", address, file);
     print(location);
@@ -149,7 +151,8 @@ int sendWendyData(char* address, char* file, int fdSocket){
     imagefd = open(location, O_RDONLY);
 
     while (bytesToSend > 0){
-        bzero(data, 0);
+        gettimeofday(&begin, NULL);
+        bzero(data, 100);
 
         if (bytesToSend < 99) read(imagefd, data, bytesToSend); 
         else read(imagefd, data, 99);
@@ -160,7 +163,14 @@ int sendWendyData(char* address, char* file, int fdSocket){
         protocolSend(fdSocket, 'F', data);
         sprintf(aux, "Frames to process: %d/%d\n", bytesToSend, size);
         print(aux);
-        usleep(100);
+        usleep(2000);
+        
+        gettimeofday(&end, NULL);
+        long seconds = end.tv_sec - begin.tv_sec;
+        long micros = (seconds * 1000000) + end.tv_usec - begin.tv_usec;
+        sprintf(aux, "Time passed: %ld\n", micros);
+        print(aux);
+
     }
 
     close(imagefd);

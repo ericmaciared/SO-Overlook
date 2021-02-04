@@ -28,6 +28,8 @@ static void* handleDanny(void* args){
     char type = 0;
     struct pollfd pfd;
 
+    struct timeval begin, end;
+
     char* imageName = NULL;
     char imageLocation[128];
     int imageSize = 0;
@@ -44,9 +46,11 @@ static void* handleDanny(void* args){
 
     while (!terminate){
         //Wait for new information on socket
+        gettimeofday(&begin, NULL);
+
         if (poll(&pfd, 1, -1) >= 0 || terminate){
             if (pfd.revents & POLLIN){
-                bzero(buffer, 0);
+                bzero(buffer, 128);                
                 type = readFromDanny(client, buffer);
             }
         }
@@ -103,12 +107,19 @@ static void* handleDanny(void* args){
                 //Reset variables
                 framesToProcess = -1;
                 imageSize = 0;
-                bzero(imageLocation, 0);
-                bzero(imageName, 0);
-                bzero(md5sum, 0);
+                bzero(imageLocation, 128);
+                bzero(imageName, 31);
+                bzero(md5sum, 33);
             }
         }
-        
+
+        //time 2
+        gettimeofday(&end, NULL);
+        long seconds = end.tv_sec - begin.tv_sec;
+        long micros = (seconds * 1000000) + end.tv_usec - begin.tv_usec;
+        sprintf(aux, "Time passed: %ld\n", micros);
+        print(aux);
+
         //If disconnection from danny 
         if (type == 'Q') break;
     }

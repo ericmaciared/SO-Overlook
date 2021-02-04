@@ -210,8 +210,8 @@ int protocolConnection(int sockfdclient, char* out){
 char protocolRead(int sockfdclient, StationData* station){
     char buffer[116];
     char aux[116];
-    bzero(buffer, 0);
-    bzero(aux, 0);
+    bzero(buffer, 116);
+    bzero(aux, 116);
 
     //Connection Request
     read(sockfdclient, buffer, 115);
