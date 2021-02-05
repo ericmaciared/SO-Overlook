@@ -163,7 +163,7 @@ int sendWendyData(char* address, char* file, int fdSocket){
         protocolSend(fdSocket, 'F', data);
         sprintf(aux, "Frames to process: %d/%d\n", bytesToSend, size);
         print(aux);
-        usleep(2000);
+        usleep(2200);
         
         gettimeofday(&end, NULL);
         long seconds = end.tv_sec - begin.tv_sec;

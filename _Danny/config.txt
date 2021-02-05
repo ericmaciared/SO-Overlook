@@ -1,5 +1,5 @@
 Igualada
-/DannyFiles
+/IgualadaFiles
 15
 127.0.0.1
 8850

@@ -32,7 +32,7 @@
 #define LLOYD_FILE_REWRITE "\n$Lloyd:\nRewriting Hallorann.txt\n"
 
 #define HALLORANN_PATH "Hallorann.txt"
-#define REWRITE_TIME 300
+#define REWRITE_TIME 60
 
 typedef struct StationStatistics{
     char nameString[100];

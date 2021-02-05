@@ -1,5 +1,5 @@
 Sant Celoni
-/TestFiles
+/SantCeloniFiles
 20
 127.0.0.1
 8850
