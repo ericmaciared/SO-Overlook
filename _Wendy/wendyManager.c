@@ -118,7 +118,14 @@ char readFromDanny(Station* client, char* out){
 
         //Wrong frame
         default:
-            replyToDanny(client, 'Z');
+            print("RECEIVED: ");
+            for (int i = 0; i < 115; i++){
+                if (buffer[i] != 0) write(1, &buffer[i], 1);
+                else write(1, "-", 1);
+            }
+            print("\n");
+            
+            //replyToDanny(client, 'Z');
             return 'Z';
     }
 

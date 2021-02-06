@@ -48,7 +48,7 @@ static void* handleDanny(void* args){
     while (!terminate){
         //Wait for new information on socket
         gettimeofday(&begin, NULL);
-        if (terminate || poll(&pfd, 1, 0) >= 0){
+        if (terminate || poll(&pfd, 1, -1) >= 0){
             if (pfd.revents & POLLIN){
                 bzero(buffer, 128);
                 type = readFromDanny(client, buffer);

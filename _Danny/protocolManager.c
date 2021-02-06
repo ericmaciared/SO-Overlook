@@ -159,14 +159,14 @@ int protocolSend(int sockfd, char type, char* data){
 
 int protocolReceive(int sockfd){
     char buffer[128];
-    char aux[128];
+    char aux[128];    
     struct pollfd pfd;
 
     pfd.fd = sockfd;
     pfd.events = POLLIN | POLLHUP;
 
     while (1){
-        if (poll(&pfd, 1, -1) >= 0){
+        if (poll(&pfd, 1, 0) >= 0){
             if (pfd.revents & POLLIN) {
                 read(sockfd, buffer, 115);
                 break;
@@ -174,6 +174,15 @@ int protocolReceive(int sockfd){
             if (pfd.revents & POLLHUP) break;
         }
     }
+
+    print("RECEIVED: ");
+    for (int i = 0; i < 115; i++)
+    {
+        if (buffer[i] != 0) write(1, &buffer[i], 1);
+        else write(1, "-", 1);
+    }
+    print("\n");
+    
 
     if (pfd.revents & POLLHUP) return -1;
     if (checkFrame(buffer, 'S', aux) > 0) return 0;
