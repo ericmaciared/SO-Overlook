@@ -12,18 +12,22 @@ void frameToString(Frame frame, char* final){
     int flag = 0;
     int i;
     bzero(final, 115);
+    print ("\nFRAME TO STRING: ");
 
     for (i = 0; i < 14; i++){
         if (frame.source[i] == '\0') flag = 1;
         if (flag) final[i] = '\0';
         else final[i] = frame.source[i];
+        write(1, &final[i], 1);
     }
-    
+
     final[14] = frame.type;
 
     for (i = 15; i < 115; i++){
         final[i] = frame.data[i-15];
+        write(1, &final[i], 1);
     }
+    print (EOL);
 
     final[115] = '\0';
 }
@@ -31,7 +35,7 @@ void frameToString(Frame frame, char* final){
 Frame makeFrame(char type, char* data){
     Frame frame;
     bzero(frame.source, 14);
-    bzero(frame.data, 100); 
+    bzero(frame.data, 100);
     strcpy(frame.source, DANNY);
 
     frame.type = type;
@@ -70,7 +74,7 @@ int checkFrame(char* frame, char type, char* out){
     }
 
     strcpy(out, newFrame.data);
-    if ((strcmp(newFrame.source, JACK) != 0) 
+    if ((strcmp(newFrame.source, JACK) != 0)
     && (strcmp(newFrame.source, WENDY) != 0)) return -1;
     if (newFrame.type != type) return -1;
 
@@ -82,7 +86,7 @@ int checkFrame(char* frame, char type, char* out){
 int protocolConnection(int sockfd, char* name){
     //Connection Request
     Frame frame;
-    char buffer[116];    
+    char buffer[116];
     char aux[128];
 
     bzero(buffer, 116);
@@ -121,7 +125,6 @@ int protocolSend(int sockfd, char type, char* data){
     Frame frame;
     char buffer[115];
     char aux[128];
-
     bzero(buffer, 115);
     bzero(aux, 128);
 
@@ -130,22 +133,21 @@ int protocolSend(int sockfd, char type, char* data){
 
     //Serialize frame
     frameToString(frame, buffer);
-    buffer[115] = '\0';
 
     //Send frame
     if(write(sockfd, buffer, 115) != 115) return -1;
     bzero(buffer, 115);
-    
+
     //Get reply for data transmissions
     if(type == 'D'){
         read(sockfd, buffer, 115);
-        
+
         print("-");
         for (int i = 0; i < 115; i++) {
             if (buffer[i] == 0)print("!");
             else write(1, &buffer[i], 1);
         }
-        
+
         print("-\n");
 
         if (checkFrame(buffer, 'B', aux) > 0) return 0;
@@ -174,10 +176,10 @@ int protocolReceive(int sockfd){
             if (pfd.revents & POLLHUP) break;
         }
     }
-    
+
     if (pfd.revents & POLLHUP) return -1;
     if (checkFrame(buffer, 'S', aux) > 0) return 0;
     if (checkFrame(buffer, 'R', aux) > 0) return -1;
-    
+
     return -1;
 }

@@ -43,18 +43,18 @@ static void* handleDanny(void* args){
 
     pfd.fd = client->sockfd;
     pfd.events = POLLIN;
+    signal(SIGINT, ksighandler);
 
     while (!terminate){
         //Wait for new information on socket
         gettimeofday(&begin, NULL);
-
-        if (poll(&pfd, 1, -1) >= 0 || terminate){
+        if (terminate || poll(&pfd, 1, 0) >= 0){
             if (pfd.revents & POLLIN){
-                bzero(buffer, 128);                
+                bzero(buffer, 128);
                 type = readFromDanny(client, buffer);
             }
         }
-        
+
         //if new image prepare for new image
         if (type == 'I'){
             imageSize = dataToImageData(buffer, imageName, md5sum);
@@ -65,7 +65,7 @@ static void* handleDanny(void* args){
             imagefd = open(imageLocation, O_WRONLY | O_CREAT, 0777);
             close(imagefd);
         }
-        
+
         //TODO: If image info fill image info
         if (type == 'F'){
             //Open image in append mode
@@ -73,17 +73,17 @@ static void* handleDanny(void* args){
 
             if (framesToProcess < 99) write(imagefd, buffer, framesToProcess);
             else write(imagefd, buffer, 99);
-            
+
             sprintf(aux, "Frames to process: %d/%d\n", framesToProcess, imageSize);
             print(aux);
 
             close(imagefd);
-            
+
             framesToProcess-=99;
 
             //If finished transmission send reply and post image in Barry
             if (framesToProcess <= 0){
-                
+
                 //Check md5sum
                 sprintf(buffer, "./Barry/%s", imageName);
                 if(checkMD5SUM(md5sum, buffer) == 0){
@@ -103,7 +103,7 @@ static void* handleDanny(void* args){
                     //Delete file
                     remove(imageLocation);
                 }
-                
+
                 //Reset variables
                 framesToProcess = -1;
                 imageSize = 0;
@@ -118,9 +118,9 @@ static void* handleDanny(void* args){
         long seconds = end.tv_sec - begin.tv_sec;
         long micros = (seconds * 1000000) + end.tv_usec - begin.tv_usec;
         sprintf(aux, "Time passed: %ld\n", micros);
-        print(aux);
+        //rint(aux);
 
-        //If disconnection from danny 
+        //If disconnection from danny
         if (type == 'Q') break;
     }
 
@@ -162,7 +162,7 @@ int main(int argc, char const *argv[]){
     if (sockfd < 0) {
         free(config.ip);
         exit(EXIT_FAILURE);
-    } 
+    }
 
     //Accept connections and assign threads indefinitely
     pfd.fd = sockfd;
@@ -181,7 +181,7 @@ int main(int argc, char const *argv[]){
                     i--;
                 }
                 else i++;
-            } 
+            }
         }
     }
 
@@ -191,7 +191,7 @@ int main(int argc, char const *argv[]){
     for (int j = 0; j < i; j++){
         pthread_join(tid[j], NULL);
     }
-    
+
     //TODO: Free all dynamic data
     free(config.ip);
     for (int j = 0; j < i; j++){

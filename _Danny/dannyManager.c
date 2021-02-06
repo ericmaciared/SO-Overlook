@@ -80,7 +80,7 @@ int getFileSize(char* address){
         return 0;
     }
     else{
-        while ((read(fd, &aux, 1)) > 0) count++;  
+        while ((read(fd, &aux, 1)) > 0) count++;
         close(fd);
     }
 
@@ -90,10 +90,10 @@ int getFileSize(char* address){
 int sendJackData(StationData* station, int fdSocket){
     //Parse station information to string
     char buffer[100];
+    bzero(buffer, 100);
     buffer[0] = '\0';
 
     stationToString(station, buffer);
-
     return protocolSend(fdSocket, 'D', buffer);
 }
 
@@ -136,7 +136,7 @@ int sendWendyData(char* address, char* file, int fdSocket){
     close(link[1]);
 
     print("Finished MD5SUM!\n");
-    
+
     //Get file size
     size = getFileSize(location);
     bytesToSend = size;
@@ -154,7 +154,7 @@ int sendWendyData(char* address, char* file, int fdSocket){
         gettimeofday(&begin, NULL);
         bzero(data, 100);
 
-        if (bytesToSend < 99) read(imagefd, data, bytesToSend); 
+        if (bytesToSend < 99) read(imagefd, data, bytesToSend);
         else read(imagefd, data, 99);
 
         bytesToSend -= 99;
@@ -164,7 +164,7 @@ int sendWendyData(char* address, char* file, int fdSocket){
         sprintf(aux, "Frames to process: %d/%d\n", bytesToSend, size);
         print(aux);
         usleep(2200);
-        
+
         gettimeofday(&end, NULL);
         long seconds = end.tv_sec - begin.tv_sec;
         long micros = (seconds * 1000000) + end.tv_usec - begin.tv_usec;
@@ -264,7 +264,7 @@ int connectToServer(Data* data, Station station, int serverId){
         s_addr.sin_port = htons(data->wendy.port);
         s_addr.sin_addr.s_addr = inet_addr(data->wendy.ip);
     }
-    
+
     //Connect to socket
     if (connect(sockfd, (void *) &s_addr, sizeof(s_addr)) < 0){
         close(sockfd);
@@ -278,7 +278,7 @@ int connectToServer(Data* data, Station station, int serverId){
         print(ERROR_CONNECT);
         return -1;
     }
-    
+
     return sockfd;
 }
 
@@ -354,7 +354,7 @@ int scanDirectory(Data* data, Station danny){
 
                         sprintf(buffer, ".%s/%s", data->path, files[i]);
                         remove(buffer);
-                        
+
                         break;
 
                     default:

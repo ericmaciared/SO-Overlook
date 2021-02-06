@@ -180,6 +180,8 @@ int protocolConnection(int sockfdclient, char* out){
     char buffer[116];
     //char aux[128];
     bzero(buffer, 116);
+    bzero(frame.source, 14);
+    bzero(frame.data, 100);
 
     //Connection Request
     read(sockfdclient, &buffer, 115);
@@ -236,6 +238,8 @@ char protocolRead(int sockfdclient, StationData* station){
 void protocolResponse(int sockfdclient, char responseType, char* response){
     Frame frame;
     char buffer[115];
+    bzero(frame.source, 14);
+    bzero(frame.data, 100);
 
     //Reply with responseType
     strcpy(frame.source, JACK);
