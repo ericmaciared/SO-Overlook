@@ -84,7 +84,7 @@ int acceptConnection(int sockfdServer, Station* client){
 
     sprintf(buff, NEW_CONNECTION, client->name);
     print(buff);
-    
+
     print(PROMPT);
     print(CONNECTION_WAITING);
     return 0;
@@ -164,6 +164,7 @@ void freeStationData(StationData* data){
 
 StationDataShared convertToStationShared(StationData* station, char* name){
     StationDataShared conversion;
+    bzero(conversion.nameString, STATION_NAME_LENGTH);
     strcpy(conversion.nameString, name);
     conversion.temperature = atof(station->temperatureString);
     conversion.humidity = atof(station->humidityString);

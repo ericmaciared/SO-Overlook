@@ -54,7 +54,7 @@ int lloyd(){
 
     //Communicate with Jack
     while (!finish) {
-        SEM_wait(&sem_dataReady); 
+        SEM_wait(&sem_dataReady);
         if (errno == EINTR) continue;
 
         // Make sure we are not printing
@@ -203,7 +203,7 @@ int main(int argc, char const *argv[]){
         signal(SIGINT, ksighandler);
         lloyd();
         shmdt(shared);
-    } 
+    }
     else{
         signal(SIGINT, ksighandler);
         print(PROMPT);
@@ -245,6 +245,6 @@ int main(int argc, char const *argv[]){
         SEM_destructor(&sem_dataProcessed);
         SEM_destructor(&sem_statistics);
     }
-    
+
     return 0;
 }

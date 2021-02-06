@@ -12,22 +12,18 @@ void frameToString(Frame frame, char* final){
     int flag = 0;
     int i;
     bzero(final, 115);
-    print ("\nFRAME TO STRING: ");
 
     for (i = 0; i < 14; i++){
         if (frame.source[i] == '\0') flag = 1;
         if (flag) final[i] = '\0';
         else final[i] = frame.source[i];
-        write(1, &final[i], 1);
     }
 
     final[14] = frame.type;
 
     for (i = 15; i < 115; i++){
         final[i] = frame.data[i-15];
-        write(1, &final[i], 1);
     }
-    print (EOL);
 
     final[115] = '\0';
 }
@@ -133,6 +129,8 @@ int protocolSend(int sockfd, char type, char* data){
 
     //Serialize frame
     frameToString(frame, buffer);
+    print(EOL);
+
 
     //Send frame
     if(write(sockfd, buffer, 115) != 115) return -1;
