@@ -14,7 +14,7 @@
 //GLOBAL
 semaphore sem_dataReady;
 semaphore sem_dataProcessed;
-semaphore sem_statistics;
+//semaphore sem_statistics;
 
 int finish = 0;
 int terminate = 0;
@@ -54,8 +54,15 @@ int lloyd(){
 
     //Communicate with Jack
     while (!finish) {
-        SEM_wait(&sem_dataReady);
-        if (errno == EINTR) continue;
+
+        print("Lloyd: Waiting SEMdataReady\n"); 
+        SEM_wait(&sem_dataReady); 
+        //1: counter 0 -> wait
+        //4: counter 1 -> execute
+        print("Lloyd: Entered SEMdataReady\n");
+        if (errno == EINTR) {
+            continue;
+        }
 
         // Make sure we are not printing
         //SEM_wait(&sem_statistics);
@@ -63,7 +70,9 @@ int lloyd(){
         //SEM_signal(&sem_statistics);
 
         // Signal Danny about process done
+        print("Lloyd: Signaling SEMdataProcessed\n");
         SEM_signal(&sem_dataProcessed);
+        //5: counter 0 -> 1
     }
 
     free(lloyd_struct.stations);
@@ -83,9 +92,14 @@ char readFromDanny(Station* client){
             sds = convertToStationShared(&sd, client->name);
             showStationData(&sd);
 
-            SEM_wait(&sem_dataProcessed);
+            print("Jack: Waiting SEMdataProcessed\n");
+            SEM_wait(&sem_dataProcessed); 
+            //2: counter 1 -> 0 -> executes
+            print("Jack: Entered SEMdataProcessed\n");
             writeToSharedMemory(shared, &sds);
+            print("Jack: Signaling SEMdataReady\n");
             SEM_signal(&sem_dataReady);
+            //3: counter 0 -> 1
 
             freeStationData(&sd);
             break;
@@ -141,8 +155,6 @@ int main(int argc, char const *argv[]){
     struct pollfd pfd;
     pid_t lloydPID;
 
-    // Reprogram signals
-
     // Check correct arguments
     if (argc <= 1 || argc > 2){
         print(ERROR_ARGS);
@@ -180,11 +192,11 @@ int main(int argc, char const *argv[]){
     // Semaphores init and creation
     SEM_constructor(&sem_dataReady);
     SEM_constructor(&sem_dataProcessed);
-    SEM_constructor(&sem_statistics);
+    //SEM_constructor(&sem_statistics);
 
-    SEM_init(&sem_dataReady, 0);
-    SEM_init(&sem_dataProcessed, 1);
-    SEM_init(&sem_statistics, 1);
+    SEM_init(&sem_dataReady, 0); //syncronization -> 0
+    SEM_init(&sem_dataProcessed, 1); //mutual exclusion -> 1
+    //SEM_init(&sem_statistics, 1);
 
     // Create fork for Lloyd
     if ((lloydPID = fork()) < 0) {
@@ -194,7 +206,7 @@ int main(int argc, char const *argv[]){
         shmctl(memidShared, IPC_RMID, NULL);
         SEM_destructor(&sem_dataReady);
         SEM_destructor(&sem_dataProcessed);
-        SEM_destructor(&sem_statistics);
+        //SEM_destructor(&sem_statistics);
         exit(EXIT_FAILURE);
     }
 
@@ -243,7 +255,7 @@ int main(int argc, char const *argv[]){
 
         SEM_destructor(&sem_dataReady);
         SEM_destructor(&sem_dataProcessed);
-        SEM_destructor(&sem_statistics);
+        //SEM_destructor(&sem_statistics);
     }
 
     return 0;
