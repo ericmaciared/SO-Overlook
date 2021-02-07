@@ -61,12 +61,16 @@ int lloyd(){
         //4: counter 1 -> execute
         print("Lloyd: Entered SEMdataReady\n");
         if (errno == EINTR) {
+            print("Lloyd: EINTR, reseting to wait\n");
+            errno = 0;
             continue;
         }
 
         // Make sure we are not printing
         //SEM_wait(&sem_statistics);
+        print("Lloyd: Getting shm info\n");
         readFromMemory(shared, &lloyd_struct);
+        print("Lloyd: Successful shm info\n");
         //SEM_signal(&sem_statistics);
 
         // Signal Danny about process done
