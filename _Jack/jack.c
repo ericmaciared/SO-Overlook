@@ -51,7 +51,7 @@ int lloyd(){
 
     //Communicate with Jack
     while (!finish) {
-        SEM_wait(&sem_dataReady); 
+        SEM_wait(&sem_dataReady);
         if (errno == EINTR) {
             errno = 0;
             continue;
@@ -81,7 +81,7 @@ char readFromDanny(Station* client){
             sds = convertToStationShared(&sd, client->name);
             showStationData(&sd);
 
-            SEM_wait(&sem_dataProcessed); 
+            SEM_wait(&sem_dataProcessed);
             writeToSharedMemory(shared, &sds);
             SEM_signal(&sem_dataReady);
 
@@ -105,7 +105,7 @@ static void* handleDanny(void* args){
 
     // Check loop to read from Danny
     while (!terminate){
-        if (poll(&pfd, 1, 0) >= 0 || terminate){
+        if (poll(&pfd, 1, 100) >= 0 || terminate){
             if (pfd.revents & POLLIN){
                 type = readFromDanny(client);
                 if (type == 'Q' || type == 'X') break;
