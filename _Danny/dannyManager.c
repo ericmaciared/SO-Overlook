@@ -99,7 +99,7 @@ int sendJackData(StationData* station, int fdSocket){
 
 int sendWendyData(char* address, char* file, int fdSocket){
     char data[100];
-    char aux[128];
+    //char aux[128];
     pid_t pid;
     int link[2];
     char* md5sum;
@@ -109,11 +109,9 @@ int sendWendyData(char* address, char* file, int fdSocket){
     int bytesToSend = -1;
     int imagefd = -1;
 
-    struct timeval begin, end;
-
     //Get MD5SUM from file
     sprintf(location, ".%s/%s", address, file);
-    print(location);
+    //print(location);
 
     if (pipe(link) < 0) return -1;
     if ((pid = fork()) < 0) return -1;
@@ -135,15 +133,13 @@ int sendWendyData(char* address, char* file, int fdSocket){
     close(link[0]);
     close(link[1]);
 
-    print("Finished MD5SUM!\n");
-
     //Get file size
     size = getFileSize(location);
     bytesToSend = size;
 
     //Send 'I' frame
     sprintf(data, "%s#%d#%s", file, size, md5sum);
-    print(data);
+    //print(data);
     protocolSend(fdSocket, 'I', data);
 
     //Send 'F' frames
@@ -151,7 +147,6 @@ int sendWendyData(char* address, char* file, int fdSocket){
     imagefd = open(location, O_RDONLY);
 
     while (bytesToSend > 0){
-        gettimeofday(&begin, NULL);
         bzero(data, 100);
 
         if (bytesToSend < 99) read(imagefd, data, bytesToSend);
@@ -161,32 +156,22 @@ int sendWendyData(char* address, char* file, int fdSocket){
 
         //Make frame and send it to Wendy
         protocolSend(fdSocket, 'F', data);
-        sprintf(aux, "Frames to process: %d/%d\n", bytesToSend, size);
-        print(aux);
+        //sprintf(aux, "Frames to process: %d/%d\n", bytesToSend, size);
+        //print(aux);
         usleep(2200);
-
-        gettimeofday(&end, NULL);
-        long seconds = end.tv_sec - begin.tv_sec;
-        long micros = (seconds * 1000000) + end.tv_usec - begin.tv_usec;
-        sprintf(aux, "Time passed: %ld\n", micros);
-        print(aux);
-
     }
 
     close(imagefd);
     bytesToSend = 0;
 
     //Wait for response
-    if (protocolReceive(fdSocket) == 0){
-       print("Data sent correctly\n");
-    }
-    else{
-        print("Data sent incorrectly\n");
-    }
+    protocolReceive(fdSocket);
+    
+    //if (protocolReceive(fdSocket) == 0) print("Data sent correctly\n");
+    //else print("Data sent incorrectly\n");
 
     //Free remaining dynamic data
     free(md5sum);
-
     return 0;
 }
 

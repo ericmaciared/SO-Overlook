@@ -95,12 +95,10 @@ int replyToDanny(Station* client, char type){
 
     switch(type){
         case 'D':
-            print("Sending DATAOK to DANNY\n");
             protocolResponse(client->sockfd, 'B', DATAOK);
             return 0;
 
         case 'K':
-            print("Sending DATAKO to DANNY\n");
             protocolResponse(client->sockfd, 'K', DATAKO);
             return 0;
 
@@ -116,10 +114,7 @@ int replyToDanny(Station* client, char type){
 
         default:
             //Erroneous processing
-            //Reply with X (Custom control variable)
-            protocolResponse(client->sockfd, 'X', DATADEAD);
-            print(DATADEAD);
-            print(EOL);
+            protocolResponse(client->sockfd, 'Z', ERROR);
 
             //Disconnect Server
             close(client->sockfd);

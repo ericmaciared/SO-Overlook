@@ -24,11 +24,9 @@ void ksighandler(){
 static void* handleDanny(void* args){
     Station* client = (Station *) args;
     char buffer[128];
-    char aux[128];
+    //char aux[128];
     char type = 0;
     struct pollfd pfd;
-
-    struct timeval begin, end;
 
     char* imageName = NULL;
     char imageLocation[128];
@@ -47,7 +45,6 @@ static void* handleDanny(void* args){
 
     while (!terminate){
         //Wait for new information on socket
-        gettimeofday(&begin, NULL);
         if (terminate || poll(&pfd, 1, -1) >= 0){
             if (pfd.revents & POLLIN){
                 bzero(buffer, 128);
@@ -74,8 +71,8 @@ static void* handleDanny(void* args){
             if (framesToProcess < 99) write(imagefd, buffer, framesToProcess);
             else write(imagefd, buffer, 99);
 
-            sprintf(aux, "Frames to process: %d/%d\n", framesToProcess, imageSize);
-            print(aux);
+            //sprintf(aux, "Frames to process: %d/%d\n", framesToProcess, imageSize);
+            //print(aux);
 
             close(imagefd);
 
@@ -104,6 +101,9 @@ static void* handleDanny(void* args){
                     remove(imageLocation);
                 }
 
+                print(PROMPT);
+                print(CONNECTION_WAITING);
+
                 //Reset variables
                 framesToProcess = -1;
                 imageSize = 0;
@@ -112,13 +112,6 @@ static void* handleDanny(void* args){
                 bzero(md5sum, 33);
             }
         }
-
-        //time 2
-        gettimeofday(&end, NULL);
-        long seconds = end.tv_sec - begin.tv_sec;
-        long micros = (seconds * 1000000) + end.tv_usec - begin.tv_usec;
-        sprintf(aux, "Time passed: %ld\n", micros);
-        //rint(aux);
 
         //If disconnection from danny
         if (type == 'Q') break;
@@ -129,6 +122,8 @@ static void* handleDanny(void* args){
 
     sprintf(buffer, "\nClosing %s station.\n", client->name);
     print(buffer);
+    print(PROMPT);
+    print(CONNECTION_WAITING);
 
     //Close client socket
     close(client->sockfd);
@@ -200,7 +195,7 @@ int main(int argc, char const *argv[]){
 
     close(sockfd);
 
-    print("All threads returned\n");
+    //print("All threads returned\n");
 
     return 0;
 }

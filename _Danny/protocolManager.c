@@ -129,8 +129,6 @@ int protocolSend(int sockfd, char type, char* data){
 
     //Serialize frame
     frameToString(frame, buffer);
-    print(EOL);
-
 
     //Send frame
     if(write(sockfd, buffer, 115) != 115) return -1;
@@ -140,13 +138,13 @@ int protocolSend(int sockfd, char type, char* data){
     if(type == 'D'){
         read(sockfd, buffer, 115);
 
-        print("-");
+        /*print("-");
         for (int i = 0; i < 115; i++) {
             if (buffer[i] == 0)print("!");
             else write(1, &buffer[i], 1);
         }
 
-        print("-\n");
+        print("-\n");*/
 
         if (checkFrame(buffer, 'B', aux) > 0) return 0;
     }
@@ -175,13 +173,13 @@ int protocolReceive(int sockfd){
         }
     }
 
-    print("RECEIVED: ");
+    /*print("RECEIVED: ");
     for (int i = 0; i < 115; i++)
     {
         if (buffer[i] != 0) write(1, &buffer[i], 1);
         else write(1, "-", 1);
     }
-    print("\n");
+    print("\n");*/
     
 
     if (pfd.revents & POLLHUP) return -1;

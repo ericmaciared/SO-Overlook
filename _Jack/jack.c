@@ -14,7 +14,6 @@
 //GLOBAL
 semaphore sem_dataReady;
 semaphore sem_dataProcessed;
-//semaphore sem_statistics;
 
 int finish = 0;
 int terminate = 0;
@@ -33,9 +32,7 @@ void ksighandler(){
 }
 
 void handleTextFile(){
-    //SEM_wait(&sem_statistics);
     writeToFile(lloyd_struct.stations, HALLORANN_PATH, lloyd_struct.numStations);
-    //SEM_signal(&sem_statistics);
 }
 
 void ksigalarmhandler(){
@@ -54,29 +51,17 @@ int lloyd(){
 
     //Communicate with Jack
     while (!finish) {
-
-        print("Lloyd: Waiting SEMdataReady\n"); 
         SEM_wait(&sem_dataReady); 
-        //1: counter 0 -> wait
-        //4: counter 1 -> execute
-        print("Lloyd: Entered SEMdataReady\n");
         if (errno == EINTR) {
-            print("Lloyd: EINTR, reseting to wait\n");
             errno = 0;
             continue;
         }
 
         // Make sure we are not printing
-        //SEM_wait(&sem_statistics);
-        print("Lloyd: Getting shm info\n");
         readFromMemory(shared, &lloyd_struct);
-        print("Lloyd: Successful shm info\n");
-        //SEM_signal(&sem_statistics);
 
         // Signal Danny about process done
-        print("Lloyd: Signaling SEMdataProcessed\n");
         SEM_signal(&sem_dataProcessed);
-        //5: counter 0 -> 1
     }
 
     free(lloyd_struct.stations);
@@ -96,23 +81,13 @@ char readFromDanny(Station* client){
             sds = convertToStationShared(&sd, client->name);
             showStationData(&sd);
 
-            print("Jack: Waiting SEMdataProcessed\n");
             SEM_wait(&sem_dataProcessed); 
-            //2: counter 1 -> 0 -> executes
-            print("Jack: Entered SEMdataProcessed\n");
             writeToSharedMemory(shared, &sds);
-            print("Jack: Signaling SEMdataReady\n");
             SEM_signal(&sem_dataReady);
-            //3: counter 0 -> 1
 
             freeStationData(&sd);
             break;
-        // Erroneous frame
-        case 'K':
-            print("\n$Jack:\nErroneous Frame\n");
-            //sendtodanny('K')
-            break;
-        // None of the previous, can include X and Q
+        // None of the previous, can include Z and Q
         default:
             break;
     }
@@ -133,16 +108,18 @@ static void* handleDanny(void* args){
         if (poll(&pfd, 1, 0) >= 0 || terminate){
             if (pfd.revents & POLLIN){
                 type = readFromDanny(client);
-                print("Received type = ");
-                write(1, &type, 1);
                 if (type == 'Q' || type == 'X') break;
                 else replyToDanny(client, type);
+                print(PROMPT);
+                print(CONNECTION_WAITING);
             }
         }
     }
 
     sprintf(buffer, "\nClosing %s station.\n", client->name);
     print(buffer);
+    print(PROMPT);
+    print(CONNECTION_WAITING);
 
     //Close client socket
     close(client->sockfd);
@@ -196,11 +173,9 @@ int main(int argc, char const *argv[]){
     // Semaphores init and creation
     SEM_constructor(&sem_dataReady);
     SEM_constructor(&sem_dataProcessed);
-    //SEM_constructor(&sem_statistics);
 
     SEM_init(&sem_dataReady, 0); //syncronization -> 0
     SEM_init(&sem_dataProcessed, 1); //mutual exclusion -> 1
-    //SEM_init(&sem_statistics, 1);
 
     // Create fork for Lloyd
     if ((lloydPID = fork()) < 0) {
@@ -210,7 +185,6 @@ int main(int argc, char const *argv[]){
         shmctl(memidShared, IPC_RMID, NULL);
         SEM_destructor(&sem_dataReady);
         SEM_destructor(&sem_dataProcessed);
-        //SEM_destructor(&sem_statistics);
         exit(EXIT_FAILURE);
     }
 
@@ -259,7 +233,6 @@ int main(int argc, char const *argv[]){
 
         SEM_destructor(&sem_dataReady);
         SEM_destructor(&sem_dataProcessed);
-        //SEM_destructor(&sem_statistics);
     }
 
     return 0;
